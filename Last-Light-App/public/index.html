@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!-- Added for responsiveness -->
+  <title>Blackfyre - Login</title>
+  
+  <!-- Consolidated CSS Links -->
+  <link rel="stylesheet" href="/css/hotd.css" type="text/css"/>
+  
+  <!-- Removed duplicate CSS link to prevent redundancy -->
+</head>
+<body>
+  <main class="hotd-container">
+    <div class="hotd-content">
+      <h2 class="hotd-section-title">Login</h2>
+
+      <!-- Display errors if any -->
+      <% if (errors && errors.length > 0) { %>
+        <ul class="hotd-error-list">
+          <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/login" method="POST" class="hotd-form" novalidate> <!-- Added novalidate to handle validation via JavaScript or backend -->
+        <!-- Optional: Include CSRF Token if your backend requires it -->
+        <% if (csrfToken) { %>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>"/> <!-- Ensure csrfToken is passed from the server -->
+        <% } %>
+        
+        <div class="hotd-field-group">
+          <label for="email" class="hotd-label">Email Address:</label>
+          <input 
+            id="email" 
+            name="email" 
+            type="email" 
+            class="hotd-input" 
+            required 
+            aria-required="true" 
+            aria-label="Email Address"
+          />
+        </div>
+
+        <div class="hotd-field-group">
+          <label for="password" class="hotd-label">Password:</label>
+          <input 
+            id="password" 
+            name="password" 
+            type="password" 
+            class="hotd-input" 
+            required 
+            aria-required="true" 
+            aria-label="Password"
+          />
+        </div>
+
+        <button type="submit" class="hotd-btn">Login</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

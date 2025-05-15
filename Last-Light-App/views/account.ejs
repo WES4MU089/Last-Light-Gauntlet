@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LAST LIGHT</title>
+
+  <!-- global stylesheet -->
+  <link rel="stylesheet" href="/css/targaryen.css">
+
+  <!-- Elden-style title font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="main-content">
+    <!-- ───────────── HEADER ───────────── -->
+    <header class="targ-header">
+      <h2>A Song of Ice and Fire Role-Playing Community</h2>
+    </header>
+
+    <!-- ───────────── MAIN WRAPPER ───────────── -->
+    <main class="targ-container">
+      <!-- USER INFO -->
+      <section class="targ-user-info elden-frame">
+        <h2>Welcome, <%= user.SL_Username %>!</h2>
+        <p>
+          Account created on:
+          <% if (user.Created_At) { %>
+            <%= user.Created_At.toLocaleDateString() %>
+          <% } else { %>
+            N/A
+          <% } %>
+        </p>
+      </section>
+
+      <!-- CHARACTERS PANEL -->
+      <section class="targ-characters-panel">
+        <div class="section-header"><h3>Your Characters</h3></div>
+
+        <% if (characters && characters.length < 2) { %>
+          <div class="btn-row">
+            <a href="/create-character" class="targ-btn targ-btn--dark">
+              Create New Character
+            </a>
+          </div>
+        <% } else { %>
+          <div class="btn-row">
+            <button class="targ-btn targ-btn--dark" disabled>
+              Max Characters Reached
+            </button>
+          </div>
+        <% } %>
+
+        <div class="account-panel-content">
+          <% if (characters && characters.length) { %>
+            <% characters.forEach(char => { %>
+              <!-- ───────────── SINGLE CHARACTER CARD ───────────── -->
+              <div class="account-card elden-frame">
+                <!-- name banner -->
+                <div class="section-header"><%= char.Name %></div>
+
+                <!-- BODY: avatar + info -->
+                <div class="card-body">
+                  <!-- avatar -->
+                  <img src="<%= char.ImagePath || '/images/male.png' %>" alt="avatar">
+
+                  <!-- INFO GRID -->
+                  <div class="card-info">
+                    <div class="info-header">House</div>
+                    <div class="info-value"><%= char.HouseName || '—' %></div>
+
+                    <div class="info-header">Region</div>
+                    <div class="info-value"><%= char.RegionName || '—' %></div>
+
+                    <div class="info-header">Approval</div>
+                    <div class="info-value">
+                      <%= char.appStatus
+                            ? char.appStatus.charAt(0).toUpperCase() + char.appStatus.slice(1)
+                            : 'Pending' %>
+                    </div>
+                  </div><!-- /.card-info -->
+                </div><!-- /.card-body -->
+
+                <!-- ACTION BAR -->
+                <div class="account-card-actions">
+                  <button
+                    data-charid="<%= char.CharacterID %>"
+                    class="view-btn targ-btn--dark">
+                    View
+                  </button>
+
+                  <button
+                    data-charid="<%= char.CharacterID %>"
+                    class="edit-btn targ-btn--dark"
+                    <% if (char.appStatus === 'approved') { %> disabled <% } %>>
+                    Edit
+                  </button>
+
+                  <button
+                    data-charid="<%= char.CharacterID %>"
+                    class="delete-btn targ-btn--dark">
+                    Delete
+                  </button>
+                </div>
+              </div><!-- /.account-card -->
+            <% }) %>
+          <% } else { %>
+            <p class="no-characters">No characters yet. Create one above!</p>
+          <% } %>
+        </div><!-- /.account-panel-content -->
+      </section>
+
+      <!-- LOGOUT -->
+      <div class="btn-row">
+        <a class="targ-btn targ-btn--dark" href="/logout">Logout</a>
+      </div>
+    </main>
+  </div>
+
+  <!-- page-specific JS -->
+  <script src="/js/account.js"></script>
+</body>
+</html>

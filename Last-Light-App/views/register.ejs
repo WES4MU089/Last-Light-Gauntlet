@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blackfyre Registration</title>
+  <!-- Cinzel font from Google Fonts: a more legible, classical serif -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" 
+    rel="stylesheet"
+  />
+  <!-- Link to our custom House of the Dragon–inspired CSS -->
+  <link rel="stylesheet" href="/css/hotd.css" />
+</head>
+<body>
+  <header class="hotd-header">
+    <div class="hotd-banner">
+      <!-- Optional: replace with a House of the Dragon–style banner image or your logo -->
+      <h1 class="hotd-title">Blackfyre</h1>
+      <p class="hotd-subtitle">A Second Life Roleplaying Community based on A Song of Ice and Fire.</p>
+    </div>
+  </header>
+
+  <main class="hotd-container">
+    <div class="hotd-content">
+      <h2 class="hotd-section-title">Registration</h2>
+
+      <!-- Show validation errors if any -->
+      <% if (errors && errors.length > 0) { %>
+        <ul class="hotd-error-list">
+          <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/register" method="POST" class="hotd-form">
+        <!-- Hidden Fields -->
+        <input type="hidden" name="sl_uuid" value="<%= sl_uuid %>" />
+        <input type="hidden" name="sl_username" value="<%= sl_username %>" />
+        <input type="hidden" name="token" value="<%= token %>" />
+
+        <div class="hotd-field-group">
+          <label class="hotd-label">SL UUID:</label>
+          <input
+            type="text"
+            value="<%= sl_uuid %>"
+            readonly
+            class="hotd-input read-only"
+          />
+        </div>
+
+        <div class="hotd-field-group">
+          <label class="hotd-label">SL Username:</label>
+          <input
+            type="text"
+            value="<%= sl_username %>"
+            readonly
+            class="hotd-input read-only"
+          />
+        </div>
+
+        <div class="hotd-field-group">
+          <label for="email" class="hotd-label">Email Address:</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="yourname@example.com"
+            class="hotd-input"
+            required
+          />
+        </div>
+
+        <div class="hotd-field-group">
+          <label for="password" class="hotd-label">Password:</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="At least 8 characters"
+            class="hotd-input"
+            required
+          />
+        </div>
+
+        <div class="hotd-field-group">
+          <label for="confirm_password" class="hotd-label">Confirm Password:</label>
+          <input
+            id="confirm_password"
+            name="confirm_password"
+            type="password"
+            placeholder="Re-enter your password"
+            class="hotd-input"
+            required
+          />
+        </div>
+
+        <button type="submit" class="hotd-btn">Register</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="hotd-footer">
+    <p>© <%= new Date().getFullYear() %> Blackfyre Community. All rights reserved.</p>
+  </footer>
+</body>
+</html>

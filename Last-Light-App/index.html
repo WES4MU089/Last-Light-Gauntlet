@@ -1,0 +1,37 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Blackfyre - Login</title>
+  <link rel="stylesheet" href="/css/hotd.css"/> <!-- or your chosen stylesheet -->
+</head>
+<body>
+  <main class="hotd-container">
+    <div class="hotd-content">
+      <h2 class="hotd-section-title">Login</h2>
+
+      <!-- Display errors if any -->
+      <% if (errors && errors.length > 0) { %>
+        <ul class="hotd-error-list">
+          <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/login" method="POST" class="hotd-form">
+        <div class="hotd-field-group">
+          <label for="email" class="hotd-label">Email Address:</label>
+          <input id="email" name="email" type="email" class="hotd-input" required/>
+        </div>
+
+        <div class="hotd-field-group">
+          <label for="password" class="hotd-label">Password:</label>
+          <input id="password" name="password" type="password" class="hotd-input" required/>
+        </div>
+
+        <button type="submit" class="hotd-btn">Login</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

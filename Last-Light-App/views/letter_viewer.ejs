@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Letter #<%= letter.LetterId %></title>
+
+  <!-- global Blackfyre look -->
+  <link rel="stylesheet" href="/css/targaryen.css">
+
+  <!-- viewer-specific tweaks -->
+  <style>
+    /* centre card */
+    .viewer-wrapper{
+      max-width:825px;          /* matches inbox column */
+      width:100%;
+      margin:60px auto 140px;
+    }
+
+    /* meta header bar */
+    .meta-bar{
+      background:var(--bg-800);
+      border-bottom:1px solid var(--gold-300);
+      text-align:center;
+      padding:.7rem 0 .55rem;
+      font-family:'Cinzel',serif;
+      letter-spacing:.04rem;
+      margin-bottom:1.25rem;
+    }
+    .meta-bar span{display:block;font-size:.9rem;}
+
+    /* body text */
+    .letter-body{
+      white-space:pre-wrap;
+      line-height:1.65;
+      font-size:1rem;
+    }
+    .salutation{margin:0 0 1.5rem 0;}
+    .signature{
+      margin-top:2.25rem;
+      text-align:right;
+      font-style:italic;
+    }
+
+    /* back link */
+    .back-row{
+      margin-top:2rem;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-content">
+    <header class="targ-header elden-frame">
+      <h1>Letter Viewer</h1>
+    </header>
+  </div>
+
+  <div class="viewer-wrapper elden-frame">
+
+    <!-- Westerosi timestamp -->
+    <div class="meta-bar">
+      <div><strong><%= ts.hourLabel %></strong></div>
+      <span><%= ts.dateLabel %></span>
+      <span><strong>To:</strong> <%= letter.ToName %></span>
+      <span><strong>From:</strong> <%= letter.FromName %></span>
+    </div>
+
+    <div class="letter-body">
+      <p class="salutation">Dear <%= letter.ToName %>,</p>
+
+      <p><%= letter.Content %></p>
+
+      <p class="signature">— <%= letter.FromName %></p>
+    </div>
+
+    <div class="back-row">
+      <a class="targ-btn--dark"
+         href="/letters/inbox<%= typeof token!=='undefined' && token ? ('?token='+token) : '' %>">
+        Back to Inbox
+      </a>
+    </div>
+
+  </div>
+
+</body>
+</html>

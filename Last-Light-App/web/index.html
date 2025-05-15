@@ -1,0 +1,153 @@
+<!-- registration.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SL Registration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    form {
+      max-width: 400px;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    button {
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    .read-only {
+      background-color: #f3f3f3;
+      border: 1px solid #ccc;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Second Life Registration</h1>
+  <p>
+    Please complete the following form to register.  
+    Your SL UUID and Avatar Name are automatically filled.
+  </p>
+  
+  <form id="registrationForm">
+    <!-- SL UUID (read-only) -->
+    <label for="slUuid">SL UUID</label>
+    <input type="text" id="slUuid" name="slUuid" readonly class="read-only" />
+
+    <!-- Player Name (read-only) -->
+    <label for="playerName">Player Name</label>
+    <input type="text" id="playerName" name="playerName" readonly class="read-only" />
+
+    <!-- Additional user fields -->
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" placeholder="Your email" required />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter a password" required />
+
+    <!-- Submit button -->
+    <button type="submit">Register</button>
+  </form>
+
+  <script>
+    /**
+     * Utility to get a query param by name.
+     * E.g., ?token=abcdef => getQueryParam("token") => "abcdef"
+     */
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+
+    /**
+     * Fetch SL data from the API using the token.
+     * Adjust the fetch URL/path if you're using a different route or domain.
+     */
+    async function fetchSLDataByToken(token) {
+      try {
+        // If running in the same Static Web App, use relative path `/api/VerifyToken/${token}`
+        const response = await fetch(`/api/VerifyToken/${token}`, {
+          method: 'GET'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching SL data:', error);
+        return null;
+      }
+    }
+
+    /**
+     * On page load:
+     * 1) Get the token from the query param.
+     * 2) Call the API to retrieve the SL UUID & Player Name.
+     * 3) Populate form fields.
+     */
+    window.addEventListener('DOMContentLoaded', async () => {
+      const token = getQueryParam('token');
+      if (!token) {
+        alert('No token provided in the URL. Please ensure you have a valid link.');
+        return;
+      }
+
+      const slData = await fetchSLDataByToken(token);
+      if (!slData) {
+        alert('Error fetching Second Life data. Please try again later.');
+        return;
+      }
+
+      // Populate the read-only fields
+      document.getElementById('slUuid').value = slData.slUuid || 'N/A';
+      document.getElementById('playerName').value = slData.slAvatarName || 'N/A';
+    });
+
+    /**
+     * Handle form submission
+     * (e.g., you might send to your own "Finalize Registration" endpoint)
+     */
+    const form = document.getElementById('registrationForm');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Gather form data
+      const formData = new FormData(form);
+      const slUuid = formData.get('slUuid');
+      const playerName = formData.get('playerName');
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      // TODO: Send registration data to your own endpoint, e.g.:
+      // const response = await fetch('/api/CompleteRegistration', {
+      //   method: 'POST',
+      //   headers: {'Content-Type': 'application/json'},
+      //   body: JSON.stringify({ slUuid, playerName, email, password })
+      // });
+      // const result = await response.json();
+      // ... handle success/error
+
+      console.log('Form submitted with:', { slUuid, playerName, email, password });
+      alert('Registration form submitted! Check console for details.');
+
+      // Optionally, reset form or navigate to a success page:
+      // form.reset();
+      // window.location.href = '/thank-you.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Letters</title>
+
+  <!-- global Targaryen theme -->
+  <link rel="stylesheet" href="/css/targaryen.css">
+
+  <!-- inbox layout (grid & spacing only) -->
+  <style>
+    .inbox-wrapper{
+      max-width:var(--builder-col-width);
+      width:100%;
+      margin:60px auto 120px;
+      display:flex;
+      flex-direction:column;
+      gap:var(--gap-md);
+    }
+    .letter-grid{
+      display:grid;
+      gap:var(--gap-md);
+      grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    }
+    .letter-card{
+      min-height:255px;                 /* allow card to grow */
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .card-header{
+      background:var(--bg-800);
+      border-bottom:1px solid var(--gold-300);
+      text-align:center;
+      padding:.4rem 0;
+      font-family:'Cinzel',serif;
+      letter-spacing:.04rem;
+    }
+    .card-meta{
+      padding:.6rem .75rem;
+      flex:1 1 auto;                   /* fill remaining space */
+      display:flex;
+      flex-direction:column;
+      gap:.45rem;
+      font-size:.9rem;
+      line-height:1.35;
+    }
+    .card-meta span{display:block;}
+
+    /* centred single button */
+    .card-actions{
+      display:flex;
+      justify-content:center;
+      padding:.7rem .75rem 1rem;
+    }
+    .card-actions .targ-btn--dark{
+      width:100%;
+      max-width:160px;
+      margin:0;
+      padding:.45rem 0;
+      font-size:.9rem;
+      text-align:center;
+    }
+
+    .no-letters{
+      text-align:center;
+      font-style:italic;
+      padding:1.25rem 0;
+    }
+  </style>
+
+  <script defer src="/js/letters.js"></script>
+</head>
+
+<body>
+
+  <div class="main-content">
+    <header class="targ-header elden-frame">
+      <h1>My Letters</h1>
+    </header>
+  </div>
+
+  <!-- Westerosi timestamp helper -->
+  <%
+    const HOURS=[
+      'Hour of the Owl','Hour of Ghosts','Hour of the Wolf',
+      'Hour of the Nightingale','Hour of the Cock','Hour of the Dawn',
+      'Hour of the Sparrow','Hour of the Smith','Hour of the Fisher',
+      'Hour of the Falcon','Hour of the Warrior','Hour of the Lion',
+      'Hour of the Sun','Hour of the Maiden','Hour of the Crane',
+      'Hour of the Hound','Hour of the Stranger','Hour of the Shepherd',
+      'Hour of the Evenstar','Hour of the Bat','Hour of the Moth',
+      'Hour of the Fox','Hour of the Cat','Hour of the Moon'];
+    const ordinal=n=>{const j=n%10,k=n%100;
+      if(j===1&&k!==11)return n+'st';
+      if(j===2&&k!==12)return n+'nd';
+      if(j===3&&k!==13)return n+'rd';
+      return n+'th';};
+    const wts=d=>{const dt=new Date(d);return{
+      hour:HOURS[dt.getHours()],
+      date:`${ordinal(dt.getDate())} Day, of the ${ordinal(dt.getMonth()+1)} Moon, 260 A.C.`};};
+  %>
+
+  <div class="inbox-wrapper">
+
+    <% if (!letters.length) { %>
+      <div class="elden-frame no-letters">You have no letters.</div>
+    <% } else { %>
+
+      <div class="letter-grid">
+
+        <% letters.forEach(l => { const ts=wts(l.CreatedAt); %>
+          <div class="elden-frame letter-card">
+
+            <div class="card-header">Letter&nbsp;ID: <%= l.LetterId %></div>
+
+            <div class="card-meta">
+              <span><%= ts.date %></span>
+              <span><%= ts.hour %></span>
+              <span><strong>To:</strong> <%= l.ToName %></span>
+              <span><strong>From:</strong> <%= l.FromName %></span>
+              <span><em><%= l.Snippet %>…</em></span>
+            </div>
+
+            <div class="card-actions">
+              <a class="targ-btn--dark view-letter"
+                 href="/letters/<%= l.LetterId %>">View</a>
+            </div>
+
+          </div>
+        <% }); %>
+
+      </div>
+
+    <% } %>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "WBS-System-Dev",
+			"path": "../../WBS/WBS-System-Dev"
+		},
+		{
+			"name": "Blackfyre-App",
+			"path": ".."
+		},
+		{
+			"name": "WBS-System-Test",
+			"path": "../../WBS-System-Test"
+		}
+	],
+	"settings": {}
+}

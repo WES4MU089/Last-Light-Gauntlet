@@ -1,0 +1,71 @@
+/*======================================================================
+   Letters Inbox  –  complements existing blackfyre.css tokens
+======================================================================*/
+
+/* ---------- page wrapper ------------------------------------------- */
+.inbox-wrapper{
+  max-width:825px;           /* matches .main-content */
+  width:100%;
+  margin:60px auto 120px;
+  display:flex;
+  flex-direction:column;
+  gap:var(--gap-md);
+}
+
+/* ---------- responsive grid of cards ------------------------------- */
+.letter-grid{
+  display:grid;
+  gap:var(--gap-md);
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+}
+
+/* ---------- individual card ---------------------------------------- */
+.letter-card{
+  height:255px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:var(--bg-700);           /* same plate as other cards   */
+}
+
+/* gold top bar inside card */
+.letter-card .card-header{
+  background:var(--bg-800);
+  border-bottom:1px solid var(--gold-300);
+  text-align:center;
+  padding:.4rem 0;
+  font-family:'Cinzel',serif;
+  letter-spacing:.04rem;
+}
+
+/* meta content block */
+.letter-card .card-meta{
+  padding:.6rem .75rem;
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  gap:.45rem;
+  font-size:.9rem;
+  line-height:1.35;
+}
+.letter-card .card-meta span{display:block;}
+
+/* action buttons (View / Destroy) */
+.letter-card .card-actions{
+  display:flex;
+  gap:var(--gap-md);
+  padding:.6rem .75rem .9rem;
+}
+.letter-card .card-actions .targ-btn--dark{
+  flex:1 1 50%;
+  margin:0;
+  padding:.4rem 0;
+  font-size:.85rem;
+}
+
+/* when there are zero letters, centre the message card               */
+.no-letters{
+  text-align:center;
+  font-style:italic;
+  padding:1rem 0;
+}

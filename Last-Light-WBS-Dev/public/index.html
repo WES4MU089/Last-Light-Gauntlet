@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WBS Hex Map</title>
+  <style>
+    /* Make sure html/body fill the screen */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #222; /* overall background */
+      font-family: sans-serif;
+    }
+
+    /* Header divider at the top */
+    .headerDivider {
+      width: 100%;
+      height: 50px;
+      background: #444;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      padding-left: 10px; /* some space for text */
+    }
+
+    /* Container holding the three dividers (left, center, right) */
+    .mainContainer {
+      display: flex;
+      width: 100%;
+      height: calc(100% - 50px); /* fill remaining space below header */
+    }
+
+    /* Each side panel (left/right) can hold future tools or UI */
+    .sidePanel {
+      width: 200px;        /* fixed width for side panels */
+      background: #333;    /* distinct color from center */
+      box-sizing: border-box;
+    }
+
+    /* The center panel (where gameCanvas lives) flexes to fill leftover space */
+    .centerPanel {
+      flex: 1;               /* take all remaining horizontal space */
+      position: relative;    /* so canvas can scale within */
+      background: #000;      /* background behind the canvas if smaller */
+      box-sizing: border-box;
+    }
+
+    /* Force the canvas to scale with the .centerPanel */
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block; /* remove any extra spacing or scrollbars */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header at the top -->
+  <div class="headerDivider">
+    <h2>WBS Map System</h2>
+  </div>
+
+  <!-- Main area: left panel, center panel, right panel -->
+  <div class="mainContainer">
+    <!-- Left divider -->
+    <div class="sidePanel leftPanel">
+      <!-- Future left tools/UI go here -->
+    </div>
+
+    <!-- Center divider: contains the game canvas, fully resizes -->
+    <div class="centerPanel">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Right divider -->
+    <div class="sidePanel rightPanel">
+      <!-- Future right tools/UI go here -->
+    </div>
+  </div>
+
+  <!-- Load Socket.IO (provided by the server) -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Load the client code (the "client.js" with your map logic) -->
+  <script src="client.js"></script>
+</body>
+</html>

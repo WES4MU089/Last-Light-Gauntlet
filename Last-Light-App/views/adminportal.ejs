@@ -1,0 +1,164 @@
+<!-- views/adminportal.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Portal</title>
+    <link rel="stylesheet" href="/css/targaryen.css" />
+  </head>
+  <body>
+    <div class="main-content">
+      <header class="targ-header">
+        <div class="ucp-banner">
+          <h1>ADMIN PORTAL</h1>
+        </div>
+        <br />
+        <h2>Manage All Characters</h2>
+      </header>
+
+      <div class="admin-tabs">
+        <button class="admin-tab-button active" data-tab="applicationsTab">
+          Applications
+        </button>
+      </div>
+
+      <div id="applicationsTab" class="tab-content active-tab">
+        <div class="admin-columns">
+          <!-- PENDING COLUMN -->
+          <div class="admin-column">
+            <h3>Pending</h3>
+            <% if (pendingChars && pendingChars.length > 0) { %>
+              <% pendingChars.forEach(char => { 
+                   // Determine color for appStatus
+                   let status = (char.appStatus || 'Pending').toLowerCase();
+                   let statusColor = '#fff'; // default (white)
+                   if (status === 'approved') statusColor = 'green';
+                   else if (status === 'denied') statusColor = 'red';
+                %>
+                <div class="admin-card">
+                  <div class="admin-card-name">
+                    <h3><%= char.Name %></h3>
+                  </div>
+                  <div class="admin-card-info">
+                    <p><strong>Created:</strong> <%= new Date(char.Created_At).toLocaleDateString() %></p>
+                    <p><strong>User:</strong> <%= char.SL_Username %></p>
+                    <p><strong>Age:</strong> <%= char.Age %></p>
+                    <p><strong>House:</strong> <%= char.House || 'N/A' %></p>
+                  </div>
+                  
+                  <!-- NEW BOTTOM DIVIDER: shows appStatus + who last updated -->
+                  <div class="admin-card-status" style="color:<%= statusColor %>">
+                    <h4><%= char.appStatus || 'Pending' %></h4>
+                  </div>
+                  <div class="admin-card-updated">
+                    <p>Reviewed by: <%= char.ModifiedBy || 'N/A' %></p>
+                  </div>
+
+                  <div class="admin-card-actions">
+                    <button class="targ-btn view-btn" data-charid="<%= char.CharacterID %>">View</button>
+                    <button class="targ-btn approve-btn" data-charid="<%= char.CharacterID %>">Approve</button>
+                    <button class="targ-btn deny-btn" data-charid="<%= char.CharacterID %>">Deny</button>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p class="no-characters">No pending characters.</p>
+            <% } %>
+          </div>
+
+          <!-- APPROVED COLUMN -->
+          <div class="admin-column">
+            <h3>Approved</h3>
+            <% if (approvedChars && approvedChars.length > 0) { %>
+              <% approvedChars.forEach(char => {
+                   let status = (char.appStatus || 'Pending').toLowerCase();
+                   let statusColor = '#fff';
+                   if (status === 'approved') statusColor = 'green';
+                   else if (status === 'denied') statusColor = 'red';
+                %>
+                <div class="admin-card">
+                  <div class="admin-card-name">
+                    <h3><%= char.Name %></h3>
+                  </div>
+                  <div class="admin-card-info">
+                    <p><strong>Created:</strong> <%= new Date(char.Created_At).toLocaleDateString() %></p>
+                    <p><strong>User:</strong> <%= char.SL_Username %></p>
+                    <p><strong>Age:</strong> <%= char.Age %></p>
+                    <p><strong>House:</strong> <%= char.House || 'N/A' %></p>
+                  </div>
+                  
+                  <!-- Bottom divider -->
+                  <div class="admin-card-status" style="color:<%= statusColor %>">
+                    <h4><%= char.appStatus || 'Pending' %></h4>
+                  </div>
+                  <div class="admin-card-updated">
+                    <p>Reviewed by: <%= char.ModifiedBy || 'N/A' %></p>
+                  </div>
+
+                  <div class="admin-card-actions">
+                    <button class="targ-btn view-btn" data-charid="<%= char.CharacterID %>">View</button>
+                    <button class="targ-btn approve-btn" data-charid="<%= char.CharacterID %>">Approve</button>
+                    <button class="targ-btn deny-btn" data-charid="<%= char.CharacterID %>">Deny</button>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p class="no-characters">No approved characters.</p>
+            <% } %>
+          </div>
+
+          <!-- DENIED COLUMN -->
+          <div class="admin-column">
+            <h3>Denied</h3>
+            <% if (deniedChars && deniedChars.length > 0) { %>
+              <% deniedChars.forEach(char => {
+                   let status = (char.appStatus || 'Pending').toLowerCase();
+                   let statusColor = '#fff';
+                   if (status === 'approved') statusColor = 'green';
+                   else if (status === 'denied') statusColor = 'red';
+                %>
+                <div class="admin-card">
+                  <div class="admin-card-name">
+                    <h3><%= char.Name %></h3>
+                  </div>
+                  <div class="admin-card-info">
+                    <p><strong>Created:</strong> <%= new Date(char.Created_At).toLocaleDateString() %></p>
+                    <p><strong>User:</strong> <%= char.SL_Username %></p>
+                    <p><strong>Age:</strong> <%= char.Age %></p>
+                    <p><strong>House:</strong> <%= char.House || 'N/A' %></p>
+                  </div>
+                  
+                  <!-- Bottom divider -->
+                  <div class="admin-card-status" style="color:<%= statusColor %>">
+                    <h4><%= char.appStatus || 'Pending' %></h4>
+                  </div>
+                  <div class="admin-card-updated">
+                    <p>Reviewed by: <%= char.ModifiedBy || 'N/A' %></p>
+                  </div>
+
+                  <div class="admin-card-actions">
+                    <button class="targ-btn view-btn" data-charid="<%= char.CharacterID %>">View</button>
+                    <button class="targ-btn approve-btn" data-charid="<%= char.CharacterID %>">Approve</button>
+                    <button class="targ-btn deny-btn" data-charid="<%= char.CharacterID %>">Deny</button>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p class="no-characters">No denied characters.</p>
+            <% } %>
+          </div>
+        </div> <!-- end .admin-columns -->
+      </div> <!-- end #applicationsTab -->
+
+    </div> <!-- end .main-content -->
+
+    <div id="viewCharModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="viewCharClose">&times;</span>
+        <div id="viewCharBody"></div>
+      </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+  </body>
+</html>

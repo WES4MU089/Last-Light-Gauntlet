@@ -1,0 +1,40 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  # Run workflow on push to the main branch
+  push:
+    branches:
+      - main
+  # Also run on pull requests targeting main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_job:
+    runs-on: ubuntu-latest
+    name: Build and Deploy Azure Static Web App
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # This action is provided by Microsoft to build & deploy your Static Web App
+      - name: Build and Deploy
+        uses: azure/static-web-apps-deploy@v1
+        with:
+          # The ID of your Static Web App (GitHub will usually inject this automatically 
+          # if you create the SWA resource using the Azure Portal or Azure CLI)
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SECRET }}
+          
+          # The folder containing your static site (relative to the repo root)
+          app_location: "web"
+          
+          # The folder containing your Azure Functions API (relative to the repo root)
+          api_location: "api"
+          
+          # The build output folder for your static site (if any).
+          # If you don't have a build step, leave it as empty or set to "."
+          # output_location: "web/build"
+
+          # For frameworks that need a build, you can specify a separate build command here
+          # but for a simple static site, no extra build command is needed.

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Create New Character • LAST LIGHT</title>
+
+  <!-- Valyrian-Steel / Targaryen styling -->
+  <link rel="stylesheet" href="/css/targaryen.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+
+  <% 
+    /* Sync these constants with your client JS (create-character.js) */
+    const ATTR_MIN   = 1,  ATTR_MAX   = 5;
+    const SKILL_MIN  = 0,  SKILL_MAX  = 5;
+    const ATTR_POOL  = 20, SKILL_POOL = 24;
+  %>
+</head>
+<body
+  data-attr-min="<%= ATTR_MIN %>"
+  data-attr-max="<%= ATTR_MAX %>"
+  data-skill-min="<%= SKILL_MIN %>"
+  data-skill-max="<%= SKILL_MAX %>">
+
+  <!-- ─────── LEFT POOL PANEL ─────── -->
+  <div class="points-panel elden-frame">
+    <div class="points-row">
+      <span class="points-label">Attribute<br>Points</span>
+      <div id="attrPointsRemainSide" class="points-value">0</div>
+    </div>
+    <div class="points-divider"></div>
+    <div class="points-row">
+      <span class="points-label">Skill<br>Points</span>
+      <div id="skillPointsRemainSide" class="points-value">0</div>
+    </div>
+  </div>
+  <!-- ──────────────────────────────── -->
+
+  <div class="main-content">
+    <header class="targ-header">
+      <h2>Create New Character</h2>
+    </header>
+
+    <main class="targ-container">
+      <!--   ▼▼▼  ONLY THIS LINE CHANGED  ▼▼▼   -->
+      <form id="createCharForm"
+            class="modal-form"
+            method="POST"
+            action="/create-character"
+            enctype="multipart/form-data">
+      <!--   ▲▲▲  ONLY THIS LINE CHANGED  ▲▲▲   -->
+
+        <!-- A) AVATAR + BASIC INFO -->
+        <div class="basic-info-wrapper">
+          <div class="avatar-card elden-frame">
+            <img id="charImgPreview"
+                 src="/images/male.png"
+                 alt="avatar"
+                 width="300" height="500">
+            <input id="charAvatar"
+                   name="avatar"
+                   type="file"
+                   accept=".jpg,jpeg,png">
+          </div>
+
+          <div class="basic-card elden-frame">
+            <div class="form-field">
+              <div class="form-header">Name</div>
+              <input id="charName" name="Name" required>
+            </div>
+
+            <div class="form-field">
+              <div class="form-header">Age</div>
+              <input id="charAge"
+                     type="number"
+                     name="Age"
+                     min="1"
+                     value="18"
+                     required>
+            </div>
+
+            <div class="form-field">
+              <div class="form-header">Sex</div>
+              <select id="charSex" name="Sex">
+                <option value="male" selected>Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <div class="form-header">Region</div>
+              <select id="Region" name="Region" required>
+                <option value="" disabled selected>Select region…</option>
+                <% regions.forEach(r => { %>
+                  <option value="<%= r.RegionID %>"><%= r.RegionName %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <div class="form-header">House</div>
+              <select id="House"
+                      name="House"
+                      disabled
+                      required
+                      data-cur="">
+                <option value="">Select region first…</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <div class="form-header">Head of House?</div>
+              <select id="charHoH" name="HoHApp">
+                <option value="no" selected>No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </div><!-- /.basic-card -->
+        </div><!-- /.basic-info-wrapper -->
+
+        <!-- DESCRIPTION -->
+        <div class="wide-field-card elden-frame">
+          <div class="form-header">Description</div>
+          <textarea id="charDesc"
+                    name="Description"
+                    rows="3"
+                    maxlength="2000"></textarea>
+          <div class="counter-row">
+            <span class="char-counter" data-for="Description"></span>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="wide-field-card elden-frame">
+          <div class="form-header">History</div>
+          <textarea id="charHistory"
+                    name="History"
+                    rows="5"
+                    maxlength="10000"></textarea>
+          <div class="counter-row">
+            <span class="char-counter" data-for="History"></span>
+          </div>
+        </div>
+
+        <!-- INLINE POOL READ-OUT -->
+        <p><strong>Attribute Points Remaining:</strong> <span id="attrPointsRemaining">0</span></p>
+        <p><strong>Skill Points Remaining:</strong> <span id="skillPointsRemaining">0</span></p>
+
+        <!-- B) ATTRIBUTES GRID -->
+        <div class="attribute-grid-wrapper">
+          <div class="attribute-grid">
+            <% coreAttributes.forEach(attr => { %>
+              <div class="attribute-item elden-frame" data-attrid="<%= attr.CoreAttributeID %>">
+                <div class="attr-name-box"><%= attr.AttributeName %></div>
+                <div class="attr-value-row"><div class="attr-value"><%= ATTR_MIN %></div></div>
+                <div class="attribute-stars"><%= '✦'.repeat(ATTR_MIN) + '✧'.repeat(ATTR_MAX - ATTR_MIN) %></div>
+                <div class="attr-buttons-row">
+                  <button class="attr-minus" type="button" data-attrid="<%= attr.CoreAttributeID %>">−</button>
+                  <button class="attr-plus"  type="button" data-attrid="<%= attr.CoreAttributeID %>">+</button>
+                </div>
+                <input class="attribute-input" type="hidden"
+                       name="attributes[<%= attr.CoreAttributeID %>]"
+                       value="<%= ATTR_MIN %>">
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- C) SKILLS BY ATTRIBUTE -->
+        <% skillsByAttribute.forEach(group => { %>
+          <div class="attribute-group">
+            <div class="attribute-group-header"><h4><%= group.coreAttributeName %> Skills</h4></div>
+            <div class="skill-grid">
+              <% group.skills.forEach(skill => { %>
+                <div class="skill-item elden-frame" data-skillid="<%= skill.SkillID %>">
+                  <div class="skill-name-box"><%= skill.Name %></div>
+                  <div class="skill-value-row"><div class="skill-value"><%= SKILL_MIN %></div></div>
+                  <div class="skill-stars"><%= '✦'.repeat(SKILL_MIN) + '✧'.repeat(SKILL_MAX - SKILL_MIN) %></div>
+                  <div class="skill-buttons-row">
+                    <button class="skill-minus" type="button" data-skillid="<%= skill.SkillID %>">−</button>
+                    <button class="skill-plus"  type="button" data-skillid="<%= skill.SkillID %>">+</button>
+                  </div>
+                  <input class="skill-input" type="hidden"
+                         name="skills[<%= skill.SkillID %>]"
+                         value="<%= SKILL_MIN %>">
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% }) %>
+
+        <!-- SUBMIT BUTTON -->
+        <button id="createCharSubmit" class="targ-btn targ-btn--dark" type="submit" disabled>
+          Create Character
+        </button>
+      </form>
+
+      <br>
+      <a class="targ-btn targ-btn--dark" href="/account">Back to Account</a>
+    </main>
+  </div><!-- /.main-content -->
+
+  <!-- Cascade data & pool totals to client JS -->
+  <script>
+    window.housesByRegion = <%- JSON.stringify(housesByRegion) %>;
+    window.ATTR_TOTAL     = <%= ATTR_POOL %>;
+    window.SKILL_TOTAL    = <%= SKILL_POOL %>;
+  </script>
+  <script src="/js/create-character.js"></script>
+</body>
+</html>

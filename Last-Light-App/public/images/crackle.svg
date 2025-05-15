@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Seamless crackled stone tile (256×256) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"
+     viewBox="0 0 256 256" fill="none" stroke="#e7d3a850" stroke-width="0.7" stroke-linecap="round">
+  <!-- Primary cracks crossing tile edges so pattern tiles -->
+  <path d="M0 64 96 0M0 128 192 0M64 256 256 64M128 256 256 128M0 192 192 256M-0 0 l32 48M256 0l-32 48
+           M256 256l-48 -32M0 256l48 -32"/>
+  <!-- Secondary micro‑cracks -->
+  <path d="M128 0l16 48M64 0l32 64M0 96l64 32M0 160l96 -48M160 256l-32 -64M224 256l-64 -32
+           M256 96l-64 32M256 160l-96 -48"/>
+  <!-- Central star‑burst fracture -->
+  <path d="M128 128l40 -22M128 128l-38 18M128 128l18 40M128 128l-22 -40"/>
+</svg>

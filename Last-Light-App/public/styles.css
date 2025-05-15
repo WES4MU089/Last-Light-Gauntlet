@@ -1,0 +1,120 @@
+/* public/css/blackfyre.css */
+
+/* Global resets or basic body style */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'UnifrakturCook', serif;
+    background: #2A2A2A url("/images/parchment-texture.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: #f5f5f5;
+  }
+  
+  /* Header / Banner */
+  .bf-header {
+    background: rgba(0,0,0,0.5);
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .bf-banner h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  
+  .bf-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.8;
+  }
+  
+  /* Main Container */
+  .bf-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: rgba(0,0,0,0.6);
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 5px;
+  }
+  
+  /* Content */
+  .bf-content {
+    padding: 1rem;
+  }
+  
+  .bf-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  
+  /* Form */
+  .bf-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .bf-field-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .bf-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 1.1rem;
+  }
+  
+  .bf-input {
+    width: 100%;
+    padding: 0.5rem;
+    font-family: 'UnifrakturCook', serif;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .bf-input.read-only {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  .bf-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1.1rem;
+    font-family: 'UnifrakturCook', serif;
+    cursor: pointer;
+    background-color: #6C2E2E;
+    border: 1px solid #6C2E2E;
+    color: #fff;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .bf-btn:hover {
+    background-color: #4a1f1f;
+  }
+  
+  /* Errors */
+  .bf-error-list {
+    background: rgba(140,0,0,0.7);
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    list-style-type: none;
+    border-radius: 3px;
+  }
+  
+  /* Footer */
+  .bf-footer {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0,0,0,0.4);
+    color: #ccc;
+    margin-top: 2rem;
+  }
+  
+  .character-history-content {
+    white-space: pre-wrap; /* preserve newlines, wrap long text */
+  }
+  

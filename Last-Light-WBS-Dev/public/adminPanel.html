@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WBS Admin Panel</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      font-family: sans-serif;
+    }
+    .header {
+      background: #444;
+      color: #fff;
+      padding: 10px;
+    }
+    .mainContainer {
+      display: flex;
+      height: calc(100vh - 40px);
+    }
+    .sidePanel {
+      width: 200px;
+      background: #333;
+      padding: 10px;
+      overflow: auto;
+    }
+    .centerPanel {
+      flex: 1;
+      background: #000;
+      position: relative;
+    }
+    .rightPanel {
+      width: 250px;
+      background: #2A2A2A;
+      padding: 10px;
+      overflow: auto;
+    }
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .tool-section {
+      margin-bottom: 10px;
+    }
+    button {
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    /* Tooltip for tile coordinates, etc. */
+    #tileTooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      display: none; /* hidden by default */
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>WBS Admin Panel</h2>
+  </div>
+
+  <!-- Tooltip for tile coordinates -->
+  <div id="tileTooltip"></div>
+
+  <div class="mainContainer">
+    <!-- Left side: admin tool buttons -->
+    <div class="sidePanel">
+      <button id="btnCreateTerrain">Create Terrain Type</button><br>
+      <button id="btnEditTerrain">Edit Terrain Type</button><br>
+      <button id="btnPaintTerrain">Paint Terrain</button><br><br>
+
+      <button id="btnCreateUnitType">Create Unit Type</button><br>
+      <button id="btnEditUnitType">Edit Unit Type</button><br>
+      <button id="btnCreateUnit">Create Unit</button><br><br>
+
+      <button id="btnCreateRegion">Create Region</button><br>
+      <button id="btnEditRegion">Edit Region</button><br><br>
+      
+      <button id="btnCreateHouse">Create House</button><br>
+      <button id="btnEditHouse">Edit House</button><br><br>
+      
+      <button id="btnCreateHolding">Create Holding</button><br>
+      <button id="btnEditHolding">Edit Holding</button><br><br>
+      
+      <!-- New Edit Character button -->
+      <button id="btnEditCharacter">Edit Character</button><br><br>
+
+      <!-- VIEWS -->
+      <h4>Views</h4>
+      <label>
+        <input type="checkbox" id="chkTerritoryView" />
+        Territory
+      </label>
+    </div>
+
+    <!-- Center: canvas for map -->
+    <div class="centerPanel">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Right: dynamic tool bench -->
+    <div class="rightPanel" id="toolBench"></div>
+  </div>
+
+  <!-- Socket.IO for real-time BFS or updates -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Load our main JS as a module -->
+  <script type="module" src="js/adminClient.js"></script>
+</body>
+</html>

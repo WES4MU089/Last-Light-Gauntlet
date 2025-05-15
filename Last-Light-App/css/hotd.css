@@ -1,0 +1,177 @@
+/* public/css/hotd.css */
+
+/* ====================================================================== */
+/* FONT FACE                                                              */
+/* ====================================================================== */
+@font-face {
+  font-family: 'Romanica';
+  src: url('/fonts/Romanica.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ====================================================================== */
+/* BASE & BODY                                                            */
+/* ====================================================================== */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Romanica', sans-serif; /* Updated font */
+  color: #f5f5f5; /* Updated text color */
+  background-color: #0f0f0f; /* Updated background color */
+  background-size: cover;
+  animation: fadeIn 1s ease-in-out; /* Included animation from second code */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ====================================================================== */
+/* HEADER                                                                 */
+/* ====================================================================== */
+.hotd-header {
+  background: linear-gradient(45deg, #1a0909, #1a0909); /* Updated background */
+  padding: 1.5rem; /* Updated padding to match general styles */
+  text-align: center;
+  color: #b08d57; /* Updated text color */
+  border-bottom: 3px solid #000; /* Updated border */
+}
+
+.hotd-banner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hotd-title {
+  margin: 0;
+  font-size: 3rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #b08d57; /* Updated color */
+}
+
+.hotd-subtitle {
+  margin: 0.3rem 0 0;
+  font-size: 1.2rem;
+  color: #b08d57; /* Updated color */
+}
+
+/* ====================================================================== */
+/* CONTAINER & CONTENT                                                    */
+/* ====================================================================== */
+.hotd-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  
+  /* Centered background image */
+  background: #1a0909 url("/public/images/bg.png") no-repeat center center; /* Updated background color */
+  background-size: cover; /* Ensures the image fills the container */
+
+  border: 1px solid #b08d57; /* Updated border color */
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  padding: 2rem;
+}
+
+.hotd-content {
+  padding: 2rem;
+}
+
+.hotd-section-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #b08d57; /* Updated color */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* ====================================================================== */
+/* ERROR LIST                                                             */
+/* ====================================================================== */
+.hotd-error-list {
+  background: rgba(176, 141, 87, 0.3); /* Updated background color */
+  border: 1px solid #b08d57; /* Updated border color */
+  padding: 1rem;
+  border-radius: 4px;
+  list-style-type: none;
+  margin-bottom: 1.5rem;
+}
+
+/* ====================================================================== */
+/* FORM                                                                   */
+/* ====================================================================== */
+.hotd-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.hotd-field-group {
+  margin-bottom: 1.2rem;
+}
+
+.hotd-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #b08d57; /* Updated label color */
+}
+
+.hotd-input {
+  width: 100%;
+  padding: 0.6rem;
+  font-family: 'Romanica', sans-serif; /* Updated font */
+  font-size: 1rem;
+  color: #f5f5f5; /* Updated text color */
+  background: #171313; /* Updated background color */
+  border: 1px solid #b08d57; /* Updated border color */
+  border-radius: 4px;
+}
+
+.hotd-input:focus {
+  outline: none;
+  border-color: #b08d57; /* Updated focus border color */
+}
+
+.read-only {
+  background: #171313; /* Updated background color */
+}
+
+/* ====================================================================== */
+/* SUBMIT BUTTON                                                          */
+/* ====================================================================== */
+.hotd-btn {
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-family: 'Romanica', sans-serif; /* Updated font */
+  background-color: #b08d57; /* Updated background color */
+  border: 1px solid #a18d57; /* Updated border color */
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, border-color 0.3s;
+}
+
+.hotd-btn:hover {
+  background-color: #b08d57; /* Consistent hover background */
+  border-color: #b08d57; /* Consistent hover border */
+}
+
+/* ====================================================================== */
+/* FOOTER                                                                 */
+/* ====================================================================== */
+.hotd-footer {
+  text-align: center;
+  padding: 1.5rem; /* Updated padding to match general styles */
+  color: #b08d57; /* Updated text color */
+  background: linear-gradient(45deg, #1a0909, #1a0909); /* Updated background */
+  border-top: 3px solid #000; /* Updated border */
+}

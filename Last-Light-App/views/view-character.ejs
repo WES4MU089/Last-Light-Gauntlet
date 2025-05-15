@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title><%= char.Name %> • LAST LIGHT</title>
+
+  <link rel="stylesheet" href="/css/targaryen.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="main-content">
+    <header class="targ-header"><h2><%= char.Name %></h2></header>
+
+    <main class="targ-container">
+      <!-- ───── BASIC INFO ───── -->
+      <div class="basic-info-wrapper">
+        <!-- avatar -->
+        <div class="avatar-card elden-frame">
+          <img src="<%= char.ImagePath || '/images/male.png' %>"
+               alt="avatar" width="300" height="500">
+        </div>
+
+        <!-- info list -->
+        <div class="basic-card elden-frame">
+          <div class="form-field">
+            <div class="form-header">AGE</div>
+            <span class="info-value"><%= char.Age %></span>
+          </div>
+
+          <div class="form-field">
+            <div class="form-header">SEX</div>
+            <span class="info-value text-uppercase"><%= char.Sex %></span>
+          </div>
+
+          <div class="form-field">
+            <div class="form-header">REGION</div>
+            <span class="info-value"><%= char.RegionName || '—' %></span>
+          </div>
+
+          <div class="form-field">
+            <div class="form-header">HOUSE</div>
+            <span class="info-value"><%= char.HouseName || '—' %></span>
+          </div>
+
+          <div class="form-field">
+            <div class="form-header">HEAD&nbsp;OF&nbsp;HOUSE</div>
+            <span class="info-value"><%= char.ApplyingHoH ? 'YES' : 'NO' %></span>
+          </div>
+        </div><!-- /.basic-card -->
+      </div><!-- /.basic-info-wrapper -->
+
+      <!-- ───── DESCRIPTION ───── -->
+      <div class="wide-field-card elden-frame">
+        <div class="form-header">DESCRIPTION</div>
+        <p style="white-space:pre-wrap"><%= char.Description || '—' %></p>
+      </div>
+
+      <!-- ───── HISTORY ───── -->
+      <div class="wide-field-card elden-frame">
+        <div class="form-header">HISTORY</div>
+        <p style="white-space:pre-wrap"><%= char.History || '—' %></p>
+      </div>
+<br><br>
+      <!-- ───── ATTRIBUTES (compact) ───── -->
+      <div class="attribute-grid-wrapper">
+        <div class="attribute-grid compact-grid">
+          <% attributes.forEach(a => { 
+               const v = attrVals[a.key] ?? 1; %>
+            <div class="attribute-item elden-frame">
+              <div class="attr-name-box"><%= a.label %></div>
+              <div class="attribute-stars">
+                <%= '✦'.repeat(v) + '✧'.repeat(5 - v) %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- ───── SKILLS (compact / grouped) ───── -->
+      <% let current = null; %>
+      <% skills.forEach(s => { %>
+        <% if (s.attrId !== current) {                        /* group break */
+             if (current !== null) { %></div></div><% }       /* close prior */
+             current = s.attrId; %>
+             <div class="attribute-group">
+               <div class="attribute-group-header">
+                 <h4><%= attributes.find(a => a.key === current).label %></h4>
+               </div>
+               <div class="skill-grid compact-grid">
+        <% } %>
+          <% const sv = skillVals[s.id] ?? 0; %>
+          <div class="skill-item elden-frame">
+            <div class="skill-name-box"><%= s.label %></div>
+            <div class="skill-stars">
+              <%= '✦'.repeat(sv) + '✧'.repeat(5 - sv) %>
+            </div>
+          </div>
+      <% }) %></div></div> <!-- close last group -->
+
+      <!-- BACK -->
+      <a class="targ-btn targ-btn--dark" href="/account">Back to Account</a>
+    </main>
+  </div>
+</body>
+</html>

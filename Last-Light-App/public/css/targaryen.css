@@ -1,0 +1,615 @@
+/* ===================================================================
+   TOKENS  –  shared colours, spacing, images
+   =================================================================== */
+   :root {
+    --gold-300:#c9ae7d;
+    --gold-100:#d4b982;
+    --gold-050:#fff4d0;
+  
+    --bg-900:#070707; /* modal / deepest panels   */
+    --bg-800:#0c0c0c; /* dark header bars         */
+    --bg-700:#181614; /* main panels / cards      */
+    --bg-600:#1a1a1a; /* elden-frame inner bg     */
+  
+    --radius-sm:4px;
+    --radius-md:8px;
+    --gap-md:1rem;
+  
+    --grain-url:url('/images/noise_texture.png');
+    --corner-tl:url('/images/gold_corner_tl.svg');
+    --corner-tr:url('/images/gold_corner_tr.svg');
+    --corner-bl:url('/images/gold_corner_bl.svg');
+    --corner-br:url('/images/gold_corner_br.svg');
+  
+    /* layout math for the fixed points panel */
+    --builder-col-width: 825px;  /* .main-content max-width          */
+    --panel-gap: 24px;           /* space between panel & column     */
+    --panel-width: 210px;        /* min-width of .points-panel       */
+  }
+  
+  /* ===================================================================
+     1) GLOBAL FONT + RESET
+     =================================================================== */
+  @font-face{
+    font-family:'Romanica';
+    src:url('/fonts/Romanica.ttf') format('truetype');
+    font-display:swap;
+  }
+  body{
+    margin:0;
+    padding:75px;
+    background:
+      url('/images/siteBG.png') center top / cover no-repeat fixed,
+      #09090a;
+    color:var(--gold-300);
+    font-family:'Romanica','Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  
+  a{color:var(--gold-300);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  
+  h1,h2,h3,h4,h5,h6{margin:.5em 0;color:var(--gold-300);}
+  p{margin:.5em 0;line-height:1.6;}
+  
+  /* ===================================================================
+     2) REUSABLE COMPONENTS
+     =================================================================== */
+  /* ----- 2-A  Elden Frame ----------------------------------------- */
+  .elden-frame{
+    position:relative;
+    padding:.9rem .65rem;
+    background:var(--bg-600);
+    border:1px solid transparent;
+    border-image:linear-gradient(90deg,var(--gold-300),var(--gold-100)) 1;
+    transition:box-shadow .25s ease;
+  }
+  .elden-frame:hover{box-shadow:0 0 6px #c9ae7d55;}
+  .elden-frame::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:var(--grain-url) repeat;
+    background-size:1024px 1500px;
+    opacity:0.2;
+  }
+  .elden-frame::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      var(--corner-tl),
+      var(--corner-tr),
+      var(--corner-bl),
+      var(--corner-br);
+    background-repeat:no-repeat;
+    background-size:48px 48px;
+    background-position:top left,top right,bottom left,bottom right;
+  }
+  .elden-frame>*{position:relative;z-index:2;}
+  
+  /* ----- 2-B  Section Header -------------------------------------- */
+  .section-header{
+    background:var(--bg-800);
+    border:1px solid var(--gold-300);
+    padding:.75rem 1rem;
+    text-align:center;
+    text-transform:uppercase;
+    font-family:'Cinzel',serif;
+    letter-spacing:.05rem;
+    margin-bottom:var(--gap-md);
+  }
+  
+  /* ----- 2-C  Buttons --------------------------------------------- */
+  .targ-btn{
+    display:inline-block;
+    background:var(--gold-300);
+    color:#171313;
+    border:2px solid var(--gold-300);
+    padding:10px 15px;
+    border-radius:var(--radius-sm);
+    font-weight:bold;
+    cursor:pointer;
+    transition:background .3s,color .3s;
+    text-transform:uppercase;
+  }
+  .targ-btn:hover:not([disabled]){background:var(--gold-100);}
+  .targ-btn:disabled{background:#555;border-color:#555;cursor:not-allowed;}
+  
+  /* ===================================================================
+     3) LAYOUT BLOCKS
+     =================================================================== */
+  .targ-header{
+    padding:20px;
+    text-align:center;
+    border-bottom:2px solid var(--gold-300);
+  }
+  .targ-header h1{font-size:2em;}
+  
+  .main-content{
+    max-width:825px;
+    width:100%;
+    margin:50px auto;
+  }
+  
+  /* ---------- Attribute + Skill Items ----------------------------- */
+  .attribute-grid,
+  .skill-grid{
+    display:grid;
+    gap:var(--gap-md);
+    grid-template-columns:1fr 1fr;
+  }
+  .attribute-item,
+  .skill-item{
+    display:flex;
+    flex-direction:column;
+    gap:.55rem;
+  }
+  
+  /* shared bars ---------------------------------------------------- */
+  .attr-name-box,
+  .skill-name-box{
+    background:#121212;
+    border:1px solid var(--gold-300);
+    text-align:center;
+    font-family:'Cinzel',serif;
+    padding:.2rem 0;
+    letter-spacing:.6px;
+  }
+  .attr-value-row,
+  .skill-value-row{display:flex;justify-content:center;}
+  .attr-value,
+  .skill-value{
+    width:56px;
+    height:56px;
+    line-height:56px;
+    background:#121212;
+    border:1px solid var(--gold-300);
+    font:700 1.6rem/56px 'Cinzel',serif;
+    text-align:center;
+  }
+  .attribute-stars,
+  .skill-stars{
+    text-align:center;
+    font-size:1.55rem;
+    color:var(--gold-300);
+  }
+  
+  /* ± button rows -------------------------------------------------- */
+  .attr-buttons-row,
+  .skill-buttons-row{display:flex;justify-content:center;gap:.35rem;}
+  .attr-buttons-row button,
+  .skill-buttons-row button{
+    width:36px;
+    height:36px;
+    line-height:32px;
+    font-size:1.2rem;
+    background:#121212;
+    border:1px solid var(--gold-300);
+    color:var(--gold-300);
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .attr-buttons-row button:hover,
+  .skill-buttons-row button:hover{background:#2b2b2b;}
+  .attr-buttons-row button:disabled,
+  .skill-buttons-row button:disabled{opacity:.35;cursor:not-allowed;}
+  
+  /* Attribute-group header (divider) ------------------------------- */
+  .attribute-group-header{
+    width:100%;
+    background:#121212;
+    border:1px solid var(--gold-300);
+    text-align:center;
+    font-family:'Cinzel',serif;
+    letter-spacing:.6px;
+    padding:.35rem 0;
+    margin:1.25rem 0 .5rem;
+    grid-column:1 / -1;
+  }
+  
+  /* ===================================================================
+     4) FIXED “POINTS REMAINING” PANEL
+     =================================================================== */
+  /* Base appearance & vertical centring ----------------------------- */
+  .points-panel{
+    position:fixed;
+    top:50%;
+    transform:translateY(-50%);
+    min-width:var(--panel-width);
+    max-width:260px;
+    background:var(--bg-700);
+    text-align:center;
+    padding:.75rem 1rem;
+    z-index:1010;
+  }
+  .points-panel p{margin:.4rem 0;line-height:1.4;}
+  
+  /* internal layout ------------------------------------------------ */
+  .points-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:.75rem;
+  }
+  .points-label{
+    font-weight:700;
+    line-height:1.2;
+    text-align:left;
+  }
+  .points-value{
+    flex:0 0 56px;  /* exact same square size as attr-value        */
+  }
+  /* thin divider line */
+  .points-divider{
+    height:1px;
+    background:var(--gold-300);
+    margin:.55rem 0;
+    opacity:.25;
+  }
+  
+  /* Horizontal docking calc ---------------------------------------- */
+  .points-panel{
+    left:calc(
+      (100vw - var(--builder-col-width)) / 2
+      - var(--panel-gap)
+      - var(--panel-width)
+    );
+  }
+  
+  /* Hide on smaller screens ---------------------------------------- */
+  @media(max-width:1150px){
+    .points-panel{display:none;}
+  }
+  
+  /* ===================================================================
+     5) MEDIA QUERIES (other tweaks)
+     =================================================================== */
+  @media(max-width:768px){
+    .attribute-grid,
+    .skill-grid{grid-template-columns:1fr;}
+    .main-content{margin:20px;}
+  }
+  
+  /* ===================================================================
+     6)  MISCELLANEOUS OVERRIDES
+     =================================================================== */
+  .modal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:transparent;z-index:1000;}
+  .modal.show{display:flex;}
+  .modal-content{width:80%;max-width:850px;color:var(--gold-300);}
+  .modal-frame{}
+  .modal-frame::after{background-image:none;}
+  .modal-content.modal-frame{
+    background-repeat:repeat-y;
+    background-size:100% auto;
+    background-color:transparent;
+  }
+  /* ===================================================================
+   BASIC-INFO LAYOUT
+   =================================================================== */
+.basic-info-wrapper{
+  display:flex;
+  gap:var(--gap-md);
+  flex-wrap:wrap;
+}
+
+/* avatar card ---------------------------------------------------- */
+.avatar-card{
+  width:310px;          /* image 300px + padding   */
+  display:flex;
+  flex-direction:column;
+  gap:.75rem;
+  align-items:center;
+}
+.avatar-card img{
+  width:300px;height:500px;object-fit:cover;
+}
+
+/* basic-field card ---------------------------------------------- */
+.basic-card{
+  flex:1 1 250px;       /* grows but never shrinks below 250 */
+  display:flex;
+  flex-direction:column;
+  gap:var(--gap-md);
+}
+
+/* wide textarea cards ------------------------------------------- */
+.wide-field-card{
+  margin-top:var(--gap-md);
+}
+.wide-field-card textarea{
+  width:100%;
+  resize:vertical;
+}
+
+/* form headers reuse attribute name-box look -------------------- */
+.attr-name-box,
+.skill-name-box,
+.form-header{
+  background:#121212;
+  border:1px solid var(--gold-300);
+  text-align:center;
+  font-family:'Cinzel',serif;
+  padding:.2rem 0;
+  letter-spacing:.6px;
+}
+
+/* inner form-field block ---------------------------------------- */
+.form-field{
+  display:flex;
+  flex-direction:column;
+  gap:.35rem;
+}
+
+/* make inputs fill card width ----------------------------------- */
+.form-field input,
+.form-field select{
+  width:100%;
+}
+
+/* ================================================================
+   TOP PAGE HEADER  (.targ-header)
+   Matches the gold-trim look of card headers / section dividers
+   ================================================================ */
+   .targ-header{
+    /* full width of .main-content */
+    width:100%;
+  
+    /* gold gradient border identical to .elden-frame */
+    background:#121212;
+    border:1px solid transparent;
+    border-image:linear-gradient(90deg,var(--gold-300),var(--gold-100)) 1;
+  
+    text-align:center;
+    padding:.6rem 0;
+    margin-bottom:var(--gap-md);
+  }
+  
+  .targ-header h1,
+  .targ-header h2{
+    margin:0;
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    letter-spacing:.05rem;
+    color:var(--gold-300);
+    font-size:1.75rem;
+  }
+
+  /* ================================================================
+   FORM CONTROLS — gold text on black, matching card aesthetic
+   ================================================================ */
+.form-field input,
+.form-field textarea,
+.form-field select,
+.modal-form input,
+.modal-form textarea,
+.modal-form select{
+  width:100%;
+  background:#0a0a0a;                /* same dark tone as card headers */
+  color:var(--gold-300);             /* gold text                      */
+  border:1px solid var(--gold-300);  /* thin gold outline              */
+  padding:6px;
+  font-family:inherit;
+  font-size:1rem;
+  border-radius:0;                   /* square corners for consistency */
+}
+
+/* hover / focus highlight */
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus,
+.modal-form input:focus,
+.modal-form textarea:focus,
+.modal-form select:focus{
+  outline:none;
+  border-color:var(--gold-100);
+  box-shadow:0 0 4px #d4b98255;
+}
+
+/* subtle placeholder colour */
+.form-field input::placeholder,
+.form-field textarea::placeholder,
+.modal-form input::placeholder,
+.modal-form textarea::placeholder{
+  color:#7f704c;
+  opacity:.9;
+}
+
+/* ================================================================
+   DESCRIPTION BARS  (skill / attribute)
+   Match header styling, but use smaller body text
+   ================================================================ */
+   .attribute-description,
+   .skill-description{
+     background:#0c0c0c;            /* same dark plate            */
+     border:1px solid var(--gold-300);
+     padding:.45rem .35rem;
+     font-size:.75rem;              /* smaller than header text   */
+     line-height:1.35;
+     text-align:left;
+     color:solid var(--gold-300); 
+     font-family:inherit;           /* keep body font (not Cinzel) */
+     font-style:italic;  
+   }
+
+   /* ================================================================
+   BUTTON VARIANTS
+   ----------------------------------------------------------------
+   .targ-btn           → existing gold-filled style (unchanged)
+   .targ-btn--dark     → NEW: dark plate + gold trim, matches cards
+   ================================================================ */
+.targ-btn--dark{
+  background:#121212;                 /* same plate as card headers   */
+  color:var(--gold-300);
+  border:2px solid var(--gold-300);
+  padding:12px 18px;                  /* a touch larger               */
+  letter-spacing:.04rem;
+  font-family:'Cinzel',serif;         /* ornamental font              */
+  transition:background .25s,box-shadow .25s;
+}
+.targ-btn--dark:hover:not([disabled]){
+  background:#1e1e1e;
+  box-shadow:0 0 6px #c9ae7d55;
+}
+.targ-btn--dark:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  background:#121212;
+  box-shadow:none;
+}
+/* ================================================================
+   WIDE ACTION BUTTONS
+   ----------------------------------------------------------------
+   • Any .targ-btn (or .targ-btn--dark) placed as a direct child of
+     .main-content, .modal-form, or .targ-container will stretch to
+     the full column width and sit with generous vertical spacing.
+   • No extra wrapper classes needed.
+   ================================================================ */
+   .main-content  > .targ-btn,
+   .main-content  > .targ-btn--dark,
+   .modal-form    > .targ-btn,
+   .modal-form    > .targ-btn--dark,
+   .targ-container> .targ-btn,
+   .targ-container> .targ-btn--dark{
+     display:block;        /* allow width:100%                      */
+     width:100%;
+     max-width:100%;
+     padding:16px 0;       /* taller banner-style button            */
+     margin:2rem 0 0;      /* gap above; next rule handles between  */
+     text-align:center;
+   }
+   
+   /* gap between stacked buttons */
+   .main-content  > .targ-btn + .targ-btn,
+   .main-content  > .targ-btn--dark + .targ-btn--dark,
+   .modal-form    > .targ-btn + .targ-btn,
+   .modal-form    > .targ-btn--dark + .targ-btn--dark,
+   .targ-container> .targ-btn + .targ-btn,
+   .targ-container> .targ-btn--dark + .targ-btn--dark{
+     margin-top:1.25rem;
+   }
+
+   /* ================================================================
+   FORCE FULL-WIDTH ON ACTION BUTTONS INSIDE .btn-row
+   (higher specificity + placed at end of file)
+   ================================================================ */
+.btn-row{
+  width:100%;
+  margin:1.75rem 0;          /* breathing room above & below */
+  text-align:center;
+}
+
+.btn-row > .targ-btn,
+.btn-row > .targ-btn--dark{
+  display:block !important;  /* override inline-block default */
+  width:100% !important;     /* span entire main column       */
+  max-width:100%;
+  padding:16px 0;            /* banner-like height            */
+  box-sizing:border-box;
+}
+
+/* ──────────────────────────────────────────────────────────
+   ACCOUNT CARDS – new layout & button styling
+   ────────────────────────────────────────────────────────── */
+   .account-card{
+    display:flex;
+    flex-direction:column;
+    gap:var(--gap-md);
+  }
+  
+  /* image + info side-by-side */
+  .card-body{
+    display:flex;
+    gap:var(--gap-md);
+  }
+  .card-body img{
+    width:140px;
+    height:230px;
+    object-fit:cover;
+  }
+  
+  /* vertical divider & info grid */
+  .card-info{
+    flex:1;
+    border-left:1px solid var(--gold-300);
+    padding-left:var(--gap-md);
+    display:grid;
+    grid-template-columns:auto 1fr;
+    column-gap:.75rem;
+    row-gap:.35rem;
+  }
+  .info-header{
+    font-family:'Cinzel',serif;
+    text-transform:uppercase;
+    letter-spacing:.04rem;
+  }
+  .info-value{
+    font-style:italic;
+  }
+  
+  /* action bar */
+  .account-card-actions{
+    display:flex;
+    gap:var(--gap-md);
+  }
+  .account-card-actions .targ-btn--dark{
+    flex:1 1 50%;
+    margin:0;            /* remove default wide-button margin */
+    padding:12px 0;
+  }
+
+  /* ensure three buttons share full width */
+.account-card-actions{
+  display:flex;
+  gap:var(--gap-md);
+}
+.account-card-actions .targ-btn--dark{
+  flex:1 1 33%;
+  margin:0;
+  padding:12px 0;
+}
+
+/* subtle greyed-out style for disabled Edit */
+.edit-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+/* live character counter under each textarea */
+.counter-row{
+  text-align:right;
+  font-size:.85rem;
+  margin-top:.25rem;
+  color:var(--gold-100);
+}
+
+/* ───────── compact grids for read-only view ───────── */
+.compact-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));  /* exactly 4 per row */
+}
+.compact-grid .attribute-item,
+.compact-grid .skill-item{
+  gap:.4rem;
+}
+.compact-grid .attr-name-box,
+.compact-grid .skill-name-box{
+  font-size:.9rem;
+  padding:.15rem 0;
+}
+.compact-grid .attribute-stars,
+.compact-grid .skill-stars{
+  font-size:1.35rem;
+}
+
+/* ────────────────────────────────────────────────────────────
+   VIEW-CHARACTER  value rows
+   ──────────────────────────────────────────────────────────── */
+   .info-value{
+    display:block;
+    text-align:center;
+    text-transform:uppercase;
+    font-style:italic;
+    margin:.5rem 0 1.25rem;
+  }

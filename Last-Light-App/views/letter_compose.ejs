@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Compose Letter</title>
+
+  <link rel="stylesheet" href="/css/targaryen.css">
+
+  <style>
+    .compose-wrapper{
+      max-width:700px;
+      width:100%;
+      margin:60px auto 140px;
+      display:flex;
+      flex-direction:column;
+      gap:var(--gap-md);
+    }
+    .input-grid{
+      display:grid;
+      gap:var(--gap-md);
+      grid-template-columns:1fr 1fr;
+    }
+    textarea{
+      min-height:260px;
+      resize:vertical;
+      font-family:'Romanica',sans-serif;
+    }
+    .counter-row{
+      text-align:right;
+      font-size:.9rem;
+      color:var(--gold-100);
+      margin-top:.35rem;
+    }
+  </style>
+
+  <script defer src="/js/letterCompose.js"></script>
+</head>
+<body>
+
+  <div class="main-content">
+    <header class="targ-header elden-frame">
+      <h1>Compose Letter</h1>
+    </header>
+  </div>
+
+  <form id="composeForm" class="compose-wrapper elden-frame">
+
+    <div class="input-grid">
+      <div class="form-field">
+        <label class="form-header">To</label>
+        <input id="toName" required maxlength="255" placeholder="Addressee">
+      </div>
+      <div class="form-field">
+        <label class="form-header">From (blank = Anonymous)</label>
+        <input id="fromName" maxlength="255" placeholder="Signature">
+      </div>
+    </div>
+
+    <div class="form-field wide-field-card">
+      <label class="form-header">Letter Body (≤ 5 000 characters)</label>
+      <textarea id="body" maxlength="5000" required></textarea>
+      <div class="counter-row"><span id="count">0</span>/5000</div>
+    </div>
+
+    <button type="submit" class="targ-btn--dark">Create Letter</button>
+  </form>
+
+  <!-- success template -->
+  <template id="successTpl">
+    <div class="elden-frame" style="text-align:center;padding:2rem 1rem">
+      <h2>✅ Letter sent!</h2>
+      <p>
+        <a id="backInbox" class="targ-btn--dark" href="#">Back to Inbox</a>
+      </p>
+    </div>
+  </template>
+
+</body>
+</html>
