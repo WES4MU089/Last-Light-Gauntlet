@@ -7,7 +7,13 @@ import {
   getHexesWithinRadius,
   pixelToHex
 } from './geometry.js';
-import { loadTerrainList } from './terrainTools.js';
+
+// Tracks painted cells for throttling
+let paintedThisDrag = new Set();
+// Batch changes for bulk update on drag end
+let pendingChanges = [];
+// Track every cell the user has painted locally this session
+export const locallyPainted = new Set();
 
 /**
  * Called when left-click dragging for painting.
@@ -16,33 +22,45 @@ export function paintCellsBrush(worldX, worldY) {
   const { mapData, selectedTerrainId, brushSize } = store;
   if (!mapData || !selectedTerrainId) return;
 
-  // Find center col/row
   const [centerC, centerR] = pixelToHex(worldX, worldY);
-  let changedCells = [];
-  
   const hexes = getHexesWithinRadius(centerC, centerR, brushSize);
+  let changedThisStep = [];
+
   hexes.forEach(cell => {
     if (!inBoundsHex(mapData, cell.col, cell.row)) return;
-    mapData[cell.row][cell.col] = selectedTerrainId;
-    changedCells.push({ col: cell.col, row: cell.row, terrainId: selectedTerrainId });
+    const key = `${cell.col},${cell.row}`;
+    if (paintedThisDrag.has(key)) return;
+    const before = mapData[cell.row][cell.col];
+    const tId = Number(selectedTerrainId);
+    if (Number(before) === tId) return;
+
+    // update local state
+    mapData[cell.row][cell.col] = tId;
+    paintedThisDrag.add(key);
+    locallyPainted.add(key);
+    changedThisStep.push({ col: cell.col, row: cell.row, terrainId: tId });
   });
 
-  renderScene();
+  if (changedThisStep.length > 0) {
+    pendingChanges.push(...changedThisStep);
+    renderScene();
+  }
+}
 
-  // Bulk update server using MapID 1 (which is correct)
-  if (changedCells.length > 0) {
-    fetch('/api/mapcells/bulkPaint', {
+// Reset tracking when mouse released, and flush pendingChanges
+export function resetPaintThrottle() {
+  paintedThisDrag = new Set();
+  if (pendingChanges.length > 0) {
+    fetch(`/api/mapcells/bulkPaint`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mapId: 1, changes: changedCells })
+      body: JSON.stringify({ mapId: store.currentMapId || 1, changes: pendingChanges })
     })
-      .then(res => res.json())
-      .then(data => {
-        console.log('[Brush] Bulk paint update successful:', data);
-        // Refresh terrain list to update colors and then re-render.
-        loadTerrainList().then(() => renderScene());
-      })
-      .catch(err => console.error('[Brush] Error in bulk paint update:', err));
+    .then(res => res.json())
+    .then(res => console.log('[PAINT] bulkPaint response:', res))
+    .catch(err => console.error('[PAINT] bulkPaint error:', err));
+
+    pendingChanges = [];
   }
 }
 
@@ -54,57 +72,35 @@ export function floodFillHex(startCol, startRow, newTerrainId) {
   if (!mapData) return;
   if (!inBoundsHex(mapData, startCol, startRow)) return;
 
-  const targetTerrainId = mapData[startRow][startCol];
-  if (targetTerrainId === newTerrainId) {
-    console.log('[FloodFill] No change needed, target equals new terrain.');
-    return; // nothing to do
-  }
+  const targetId = Number(mapData[startRow][startCol]);
+  const fillId = Number(newTerrainId);
+  if (targetId === fillId) return;
 
-  let changedCells = [];
-  let queue = [{ col: startCol, row: startRow }];
-  let visited = new Set();
+  const queue = [{ col: startCol, row: startRow }];
+  const visited = new Set();
+  let changed = [];
 
-  while (queue.length > 0) {
+  while (queue.length) {
     const { col, row } = queue.shift();
     const key = `${col},${row}`;
     if (visited.has(key)) continue;
     visited.add(key);
-
     if (!inBoundsHex(mapData, col, row)) continue;
-    if (mapData[row][col] !== targetTerrainId) continue;
+    if (Number(mapData[row][col]) !== targetId) continue;
 
-    // Paint it
-    mapData[row][col] = newTerrainId;
-    changedCells.push({ col, row, terrainId: newTerrainId });
+    // apply local fill
+    mapData[row][col] = fillId;
+    locallyPainted.add(key);
+    changed.push({ col, row, terrainId: fillId });
 
-    // Add neighbors
     hexNeighbors(col, row).forEach(n => {
       const nKey = `${n.col},${n.row}`;
-      if (!visited.has(nKey)) {
-        queue.push(n);
-      }
+      if (!visited.has(nKey)) queue.push(n);
     });
   }
 
-  renderScene();
-
-  if (changedCells.length > 0) {
-    fetch('/api/mapcells/bulkPaint', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mapId: 1, changes: changedCells })
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log('[FloodFill] Bulk update response:', data);
-        // Refresh terrain list and re-render to update the displayed colors.
-        loadTerrainList().then(() => renderScene());
-      })
-      .catch(err => console.error('[FloodFill] Error in bulk update:', err));
+  if (changed.length > 0) {
+    pendingChanges.push(...changed);
+    renderScene();
   }
 }
-
-/**
- * We also need pixelToHex - but that's in geometry.js,
- * so we import it or define a small wrapper here:
- */

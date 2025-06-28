@@ -1,30 +1,53 @@
-// js/socketHandlers.js
+/* ------------------------------------------------------------------ */
+/* public/js/socketHandlers.js                                        */
+/* ------------------------------------------------------------------ */
+/* eslint-disable no-console */
 import { store } from './store.js';
 import { renderScene } from './mapRenderer.js';
 
-export function initSocket() {
-  // “io” is provided by <script src="/socket.io/socket.io.js">
+/**
+ * Called once from adminClient.js after the page boots.
+ * Hooks up socket.io and keeps unit / misc state in sync.
+ * We deliberately *ignore* the mapData that the server emits,
+ * because we already fetched a fresh, authoritative copy via
+ * /api/mapcells on page-load and we don’t want it overwritten.
+ */
+export function initSocket () {
+  /* socket.io client is exposed globally (bundled in index.html) */
   const socket = io();
-  store.socket = socket; // store reference if needed
+  store.socket = socket;
 
-  // Listen for server messages
+  /* -------------------------------------------------------------- */
+  /* initial handshake                                               */
+  /* -------------------------------------------------------------- */
   socket.on('initState', data => {
-    store.mapData = data.mapData;
+    // mapId is still useful (e.g. for future API calls)
+    store.socketMapId = data.mapId;
+    // but DO NOT touch store.mapData here
     store.unit = data.unit;
     renderScene();
   });
 
+  /* -------------------------------------------------------------- */
+  /* realtime game ticks                                             */
+  /* -------------------------------------------------------------- */
   socket.on('gameUpdate', data => {
-    store.mapData = data.mapData;
+    // keep units in sync
     store.unit = data.unit;
+    // ignore data.mapData to avoid reverting terrain colours
     renderScene();
   });
+
+  /* -------------------------------------------------------------- */
+  /* diagnostics                                                     */
+  /* -------------------------------------------------------------- */
+  socket.on('connect_error', err => console.warn('[socket] connect_error', err));
+  socket.on('disconnect',     ()  => console.log('[socket] disconnected'));
 }
 
-/**
- * Called when we want to set BFS path for the “unit,” e.g. left-click.
- */
-export function setPath(col, row) {
-  if (!store.socket) return;
-  store.socket.emit('setPath', { col, row });
+/* ------------------------------------------------------------------ */
+/* helper                                                             */
+/* ------------------------------------------------------------------ */
+export function setPath (col, row) {
+  if (store.socket) store.socket.emit('setPath', { col, row });
 }

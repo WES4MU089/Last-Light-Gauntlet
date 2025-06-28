@@ -76,7 +76,7 @@ router.post("/give", async (req,res)=>{
       .input("fromC", sql.Int, fromChar)
       .input("toC",   sql.Int, toChar)
       .query(`
-        INSERT INTO LetterTransfers (LetterId,FromOwnerCharId,ToOwnerCharId)
+        INSERT INTO LetterTransfers (LetterId,FromCharId,ToCharId)
         VALUES (@lid,@fromC,@toC)
       `);
 

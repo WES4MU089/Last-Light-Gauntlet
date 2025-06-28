@@ -218,7 +218,7 @@ function updateTerrain() {
  * Load all terrain from /api/terrain and store in store.terrainList.
  */
 export function loadTerrainList() {
-  return fetch('/api/terrain')
+  return fetch('/api/terrain', { cache: 'no-store' })
     .then(res => res.json())
     .then(list => {
       store.terrainList = list;

@@ -1,0 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+
+:root {
+  --gold-300: #c9ae7d;
+  --gold-100: #d4b982;
+  --gold-050: #fff4d0;
+
+  --bg-900: #070707;
+  --bg-800: #0c0c0c;
+  --bg-700: #181614;
+  --bg-600: #1a1a1a;
+
+  --grain-url: url('/images/noise_texture.png');
+  --corner-tl: url('/images/gold_corner_tl.svg');
+  --corner-tr: url('/images/gold_corner_tr.svg');
+  --corner-bl: url('/images/gold_corner_bl.svg');
+  --corner-br: url('/images/gold_corner_br.svg');
+
+  --radius-sm: 4px;
+  --gap-md: 1rem;
+}
+
+/* Global Reset */
+body {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  background:
+    var(--grain-url) repeat,
+    #09090a url('/images/siteBG.png') center top / cover no-repeat fixed;
+  color: var(--gold-300);
+}
+
+/* Header */
+.header {
+  background: var(--bg-800);
+  border-bottom: 2px solid var(--gold-300);
+  text-align: center;
+  padding: 20px 10px;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: .05rem;
+  font-weight: 700;
+}
+
+/* Layout Containers */
+.mainContainer {
+  display: flex;
+  height: calc(100vh - 80px);
+  gap: var(--gap-md);
+  padding: var(--gap-md);
+}
+
+/* Side Panels */
+.sidePanel,
+.rightPanel {
+  background: var(--bg-700);
+  padding: var(--gap-md);
+  border: 1px solid var(--gold-300);
+  position: relative;
+  z-index: 1;
+}
+.sidePanel {
+  width: 220px;
+}
+.rightPanel {
+  width: 260px;
+}
+
+/* Center Panel (Canvas Area) */
+.centerPanel {
+  flex: 1;
+  background: var(--bg-900);
+  border: 1px solid var(--gold-300);
+  position: relative;
+  z-index: 1;
+}
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Buttons */
+button {
+  font-family: 'Cinzel', serif;
+  background: var(--bg-800);
+  color: var(--gold-300);
+  border: 1px solid var(--gold-300);
+  padding: 10px;
+  width: 100%;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 6px;
+}
+button:hover:not([disabled]) {
+  background: var(--bg-600);
+  box-shadow: 0 0 6px #c9ae7d55;
+}
+button:disabled {
+  background: #444;
+  border-color: #444;
+  cursor: not-allowed;
+}
+
+/* Tooltip */
+#tileTooltip {
+  position: absolute;
+  background: rgba(10, 10, 10, 0.85);
+  color: var(--gold-300);
+  border: 1px solid var(--gold-100);
+  padding: 4px 8px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: var(--radius-sm);
+  display: none;
+}
+
+/* Checkbox Section */
+.sidePanel h4 {
+  margin-top: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--gold-100);
+}
+.sidePanel label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--gold-300);
+}
+
+/* Inputs */
+.rightPanel input,
+.rightPanel textarea,
+.rightPanel select {
+  width: 100%;
+  background: var(--bg-800);
+  color: var(--gold-300);
+  border: 1px solid var(--gold-300);
+  padding: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  margin-bottom: var(--gap-md);
+}
+.rightPanel input:focus,
+.rightPanel textarea:focus,
+.rightPanel select:focus {
+  outline: none;
+  border-color: var(--gold-100);
+  box-shadow: 0 0 4px #d4b98255;
+}
+
+/* Grain Overlay (Optional) */
+.sidePanel::before,
+.rightPanel::before,
+.centerPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--grain-url) repeat;
+  background-size: 1024px 1500px;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- loading overlay --------------------------------------------------- */
+#loadingOverlay{
+  position:fixed;
+  inset:0;
+  background:#111 url("/images/noise_texture.png") repeat; /* optional */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;          /* keeps it above the canvas */
+  transition:opacity .3s ease;
+}
+#loadingOverlay.hidden{ opacity:0; pointer-events:none; }
+
+/* simple spinner */
+#loadingOverlay .spinner{
+  width:64px; height:64px;
+  border:8px solid #444;
+  border-top-color:#00bfff;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }

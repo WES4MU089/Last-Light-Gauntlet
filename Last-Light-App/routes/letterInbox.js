@@ -1,5 +1,5 @@
 /**************************************************************************
- * routes/letterInbox.js – character-centric inbox
+ * routes/letterInbox.js – character-centric inbox (stateless/JWT)
  **************************************************************************/
 "use strict";
 const express = require("express");
@@ -9,20 +9,19 @@ const router  = express.Router();
 
 async function pool () { return sql.connected ? sql : sql.connect(); }
 
-/* ── simple auth: session or ?token=JWT ───────────────────────────── */
-async function requireLogin (req, res, next) {
-  if (req.session?.userId) return next();
-
+/* ── stateless JWT auth: always trust the ?token=JWT ───────────────── */
+async function requireLogin(req, res, next) {
   const tok = req.query.token;
   if (!tok) return res.status(401).send("Auth required.");
 
   try {
-    const p = jwt.verify(tok, process.env.JWT_SECRET);
-    req.session.userId = p.userId;
+    const payload = jwt.verify(tok, process.env.JWT_SECRET);
+    req.userId = payload.userId;     // Use req.userId in all routes!
+    req.SL_UUID = payload.SL_UUID;   // (if you need it)
     next();
   } catch (e) {
     console.error("[letters/inbox] bad JWT:", e);
-    res.status(401).send("Invalid / expired token.");
+    return res.status(401).send("Invalid / expired token.");
   }
 }
 
@@ -31,14 +30,19 @@ router.get("/inbox", requireLogin, async (req, res) => {
   try {
     const p = await pool();
 
-    /* active character for this wearer */
+    // Always use req.userId, NOT req.session
     const u = await p.request()
-      .input("uid", sql.Int, req.session.userId)
+      .input("uid", sql.Int, req.userId)
       .query("SELECT ActiveCharacterID FROM Users WHERE UserID=@uid");
 
-    const charId = u.recordset[0]?.ActiveCharacterID || 0;
+    const charId = u.recordset[0]?.ActiveCharacterID;
+    console.log(`[INBOX] For user ${req.userId}, active character is:`, charId);
+    if (!charId) {
+      // Always pass the token to the template!
+      return res.render("letters_inbox", { letters: [], token: req.query.token });
+    }
 
-    /* letters the character currently owns */
+    // Only show letters for this character
     const l = await p.request()
       .input("cid", sql.Int, charId)
       .query(`
@@ -49,7 +53,8 @@ router.get("/inbox", requireLogin, async (req, res) => {
         ORDER  BY CreatedAt DESC
       `);
 
-    res.render("letters_inbox", { letters: l.recordset });
+    // Always pass the token to the template!
+    res.render("letters_inbox", { letters: l.recordset, token: req.query.token });
   } catch (err) {
     console.error("[GET /letters/inbox]", err);
     res.status(500).send("Server error.");
@@ -63,11 +68,13 @@ router.post("/:id/destroy", requireLogin, async (req, res) => {
   try {
     const p = await pool();
 
+    // Always use req.userId, NOT req.session
     const u = await p.request()
-      .input("uid", sql.Int, req.session.userId)
+      .input("uid", sql.Int, req.userId)
       .query("SELECT ActiveCharacterID FROM Users WHERE UserID=@uid");
 
-    const charId = u.recordset[0]?.ActiveCharacterID || 0;
+    const charId = u.recordset[0]?.ActiveCharacterID;
+    if (!charId) return res.status(403).json({ error: "No active character." });
 
     const del = await p.request()
       .input("lid", sql.Int, letterId)

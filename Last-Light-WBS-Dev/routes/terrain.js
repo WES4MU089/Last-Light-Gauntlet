@@ -40,8 +40,8 @@ router.post('/', checkAdmin, async (req, res) => {
   }
 });
 
-// GET /api/terrain - List all terrain types
-router.get('/', checkAdmin, async (req, res) => {
+// GET /api/terrain - List all terrain types (PUBLIC)
+router.get('/', async (req, res) => {
   try {
     const pool = req.app.get('dbpool');
     const result = await pool.request().query(`

@@ -23,7 +23,7 @@
       grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
     }
     .letter-card{
-      min-height:255px;                 /* allow card to grow */
+      min-height:255px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -38,7 +38,7 @@
     }
     .card-meta{
       padding:.6rem .75rem;
-      flex:1 1 auto;                   /* fill remaining space */
+      flex:1 1 auto;
       display:flex;
       flex-direction:column;
       gap:.45rem;
@@ -124,7 +124,7 @@
 
             <div class="card-actions">
               <a class="targ-btn--dark view-letter"
-                 href="/letters/<%= l.LetterId %>">View</a>
+                 href="/letters/<%= l.LetterId %>?token=<%= token %>">View</a>
             </div>
 
           </div>

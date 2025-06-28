@@ -21,6 +21,13 @@ app.use(session({
   saveUninitialized: false
 }));
 
+// --------- NO-STORE MIDDLEWARE (add this near the top) ---------
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+// ---------------------------------------------------------------
+
 // Admin authentication routes
 const slAdminAuthRouter = require('./routes/slAdminAuth');
 const adminTokenLoginRouter = require('./routes/adminTokenLogin');
@@ -76,6 +83,7 @@ db.initPool()
     await db.syncMapCells(mapId, totalRows, totalCols);
     const mapData = await db.loadMapCellsFromDB(mapId, totalRows, totalCols);
     gameLogic.init({ terrainInfo, mapData });
+    app.set('gameLogic', gameLogic); 
     // Attach the actual mapId to gameLogic for later use.
     gameLogic.mapId = mapId;
     console.log('Game state initialized with MapID:', mapId);

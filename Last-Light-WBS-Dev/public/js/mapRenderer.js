@@ -5,20 +5,20 @@ import { hexToPixel, HEX_WIDTH, HEX_HEIGHT } from './geometry.js';
 let canvas, ctx;
 let mapImage = null;
 let territoryMapImage = null;
-let baseImage = null;  // For optional tinted base behind units/holdings
+let baseImage = null;
 
-// Global caches
 const unitImageCache = {};
 const holdingImageCache = {};
 const tintedCache = {};
 
-// Base icon sizes (at scale=1.0)
 const BASE_UNIT_SIZE = 25;
 const BASE_HOLDING_SIZE = 25;
 
-// Flag to schedule a single render per animation frame
 let renderScheduled = false;
-function scheduleRenderScene() {
+
+// ---------- Core Rendering Cycle ----------
+
+export function scheduleRenderScene() {
   if (!renderScheduled) {
     renderScheduled = true;
     requestAnimationFrame(() => {
@@ -28,112 +28,131 @@ function scheduleRenderScene() {
   }
 }
 
-/**
- * Initialize the renderer with references to the canvas,
- * the normal map image, and territory map image (optional).
- */
 export function initRenderer(canvasEl, mapImg, territoryImg) {
   canvas = canvasEl;
   ctx = canvas.getContext('2d');
 
-  // Save references to our two maps
   mapImage = mapImg;
   territoryMapImage = territoryImg;
 
-  // Resize on load using scheduled renders
-  window.addEventListener('resize', () => {
-    resizeCanvas();
-  });
   resizeCanvas();
 
-  // If main or territory map isn't fully loaded, schedule render when it completes
-  if (!mapImage.complete) {
-    mapImage.onload = scheduleRenderScene;
-  }
-  if (territoryMapImage && !territoryMapImage.complete) {
-    territoryMapImage.onload = scheduleRenderScene;
+  if (mapImage && !mapImage.complete) {
+    mapImage.onload = () => {
+      resizeCanvas();
+      fitToBounds();
+      scheduleRenderScene();
+    };
+  } else if (mapImage?.complete) {
+    fitToBounds();
   }
 
-  // Optional base "flag"
+  if (territoryMapImage && !territoryMapImage.complete) {
+    territoryMapImage.onload = () => {
+      scheduleRenderScene();
+    };
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    scheduleRenderScene();
+  });
+
   baseImage = new Image();
   baseImage.src = '/img/wbs/base.png';
   baseImage.onload = scheduleRenderScene;
+
+  ['regionBanner','houseBanner'].forEach(key => {
+    const img = new Image();
+    img.src = `/images/units/${key}.png`;
+    unitImageCache[key] = img;
+  });
+
+  if (typeof store.subscribe === 'function') {
+    store.subscribe(() => { scheduleRenderScene(); });
+  }
 }
 
-/**
- * Main render function.
- * Note: The update here now always draws terrain overlays based on the current mapData and terrainList.
- */
-export function renderScene() {
-  if (!ctx) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+// ---------- Camera Fit ----------
 
-  const { x, y, scale } = store.camera;
+function fitToBounds() {
+  if (!canvas || !mapImage || !mapImage.complete) return;
+  const rect = canvas.getBoundingClientRect();
+  const mw = mapImage.naturalWidth;
+  const mh = mapImage.naturalHeight;
+  const offsetX = (rect.width - mw) / 2;
+  const offsetY = (rect.height - mh) / 2;
+  store.camera = { x: offsetX, y: offsetY, scale: 1 };
+}
+
+function resizeCanvas() {
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+}
+
+// ---------- Scene Rendering ----------
+
+export function renderScene() {
+  if (!ctx || !mapImage) return;
+  const { x = 0, y = 0, scale = 1 } = store.camera || {};
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
 
-  // Decide which map (normal vs. territory)
-  const baseMap = (store.views && store.views.territory && territoryMapImage)
+  // Draw main map image at 1:1 pixel resolution
+  const baseMap = (store.views?.territory && territoryMapImage?.complete)
     ? territoryMapImage
-    : mapImage;
+    : (mapImage?.complete ? mapImage : null);
 
-  // Draw the chosen base map
-  if (baseMap) {
-    ctx.drawImage(baseMap, 0, 0);
+  if (baseMap) ctx.drawImage(baseMap, 0, 0);
+
+  // Draw hex grid overlays
+  if (baseMap) drawGrid(ctx, baseMap);
+
+  // Terrain overlays
+  if (store.views?.showTerrainOverlays && Array.isArray(store.mapData) && Array.isArray(store.terrainList)) {
+    const lookup = Object.fromEntries(store.terrainList.map(t => [Number(t.terrain_id), t]));
+    store.mapData.forEach((row, r) => {
+      if (!Array.isArray(row)) return;
+      row.forEach((cell, c) => {
+        const terr = lookup[Number(cell)];
+        const [cx, cy] = hexToPixel(c, r);
+        const fill = terr ? hexToRgba(terr.color, 0.5) : 'rgba(0,0,0,0)';
+        drawHex(ctx, cx, cy, fill, 'rgba(0,0,0,0.2)');
+      });
+    });
   }
 
-  // Always draw terrain overlays so that the painted colors show.
-  drawTerrainOverlays();
-
-  // Debug: draw BFS unit if present
+  // Draw dynamic overlays
   drawBfsUnit();
-
-  // Draw all units & holdings
   drawAllUnits();
   drawAllHoldings();
 
   ctx.restore();
 }
 
-/**
- * Keep canvas sized.
- */
-function resizeCanvas() {
-  if (!canvas) return;
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-  scheduleRenderScene();
-}
+// ---------- Grid and Hex Utilities ----------
 
-/**
- * Draw terrain overlays: for each cell, draw a hex filled with the terrain's color.
- */
-function drawTerrainOverlays() {
-  const { mapData, terrainList } = store;
-  if (!mapData || !terrainList) return;
-
-  for (let row = 0; row < mapData.length; row++) {
-    for (let col = 0; col < mapData[row].length; col++) {
-      const [cx, cy] = hexToPixel(col, row);
-      const terrainId = mapData[row][col];
-      const terr = terrainList.find(t => t.terrain_id === terrainId);
-
-      if (!terr) {
-        drawHex(cx, cy, 'rgba(0,0,0,0)', 'rgba(0,0,0,0.2)');
-      } else {
-        // Use the terrain's color with an alpha of 0.5 for the overlay.
-        drawHex(cx, cy, hexToRgba(terr.color, 0.5), 'rgba(0,0,0,0.2)');
-      }
+function drawGrid(ctx2, img) {
+  const hStep = HEX_WIDTH * 0.75;
+  const vStep = HEX_HEIGHT;
+  const cols  = Math.ceil(img.naturalWidth  / hStep) + 1;
+  const rows  = Math.ceil(img.naturalHeight / vStep) + 1;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const [cx, cy] = hexToPixel(c, r);
+      if (cx < -HEX_WIDTH || cy < -HEX_HEIGHT || cx > img.naturalWidth + HEX_WIDTH || cy > img.naturalHeight + HEX_HEIGHT) continue;
+      drawHex(ctx2, cx, cy, 'rgba(0,0,0,0)', 'rgba(0,0,0,0.2)');
     }
   }
 }
 
-/**
- * Draw a single hex polygon.
- */
-function drawHex(cx, cy, fillStyle, strokeStyle) {
-  const corners = [
+function drawHex(ctx2, cx, cy, fill, stroke) {
+  const pts = [
     { x: cx - HEX_WIDTH / 2, y: cy },
     { x: cx - HEX_WIDTH / 4, y: cy - HEX_HEIGHT / 2 },
     { x: cx + HEX_WIDTH / 4, y: cy - HEX_HEIGHT / 2 },
@@ -141,24 +160,26 @@ function drawHex(cx, cy, fillStyle, strokeStyle) {
     { x: cx + HEX_WIDTH / 4, y: cy + HEX_HEIGHT / 2 },
     { x: cx - HEX_WIDTH / 4, y: cy + HEX_HEIGHT / 2 }
   ];
-
-  ctx.beginPath();
-  corners.forEach((pt, i) => {
-    if (i === 0) ctx.moveTo(pt.x, pt.y);
-    else ctx.lineTo(pt.x, pt.y);
-  });
-  ctx.closePath();
-
-  ctx.fillStyle = fillStyle;
-  ctx.fill();
-  ctx.strokeStyle = strokeStyle;
-  ctx.lineWidth = 1;
-  ctx.stroke();
+  ctx2.beginPath();
+  pts.forEach((p, i) => i ? ctx2.lineTo(p.x, p.y) : ctx2.moveTo(p.x, p.y));
+  ctx2.closePath();
+  ctx2.fillStyle = fill; ctx2.fill();
+  ctx2.strokeStyle = stroke; ctx2.lineWidth = 1; ctx2.stroke();
 }
 
-/**
- * Debug BFS unit.
- */
+function hexToRgba(hex, a) {
+  if (!hex || !hex.startsWith('#') || hex.length < 7) return `rgba(255,255,255,${a})`;
+  const r = parseInt(hex.slice(1, 3), 16),
+    g = parseInt(hex.slice(3, 5), 16),
+    b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function getHouseColor(id) {
+  return store.houses.find(h => h.HouseID === id)?.HouseColor || '#fff';
+}
+
+// ---------- Unit and Holdings Rendering ----------
+
 function drawBfsUnit() {
   const { unit } = store;
   if (!unit) return;
@@ -178,10 +199,116 @@ function drawBfsUnit() {
   ctx.fill();
 }
 
+function drawAllUnits() {
+  if (!Array.isArray(store.units)) return;
+  store.units.forEach(u => {
+    const [cx, cy] = hexToPixel(u.col, u.row);
+    drawUnitSprite(u, cx, cy);
+  });
+}
+
+function drawUnitSprite(u, mapX, mapY) {
+  const factor = Math.sqrt(store.camera.scale || 1);
+  const w = BASE_UNIT_SIZE * factor;
+  const h = BASE_UNIT_SIZE * factor;
+  const x = mapX - w / 2;
+  const y = mapY + HEX_HEIGHT / 2 - h;
+
+  // Base sprite
+  if (baseImage?.complete) {
+    ctx.drawImage(baseImage, x, y, w, h);
+  }
+
+  // Region banner tint
+  const regImg = unitImageCache['regionBanner'];
+  let regionColor = '#ffffff';
+  if (u.RegionID && store.regions) {
+    const reg = store.regions.find(r => r.RegionID === u.RegionID);
+    if (reg?.regionColor) regionColor = reg.regionColor;
+  }
+  if (regImg?.complete) {
+    tintedDraw(regImg, x, y, w, h, regionColor, 0.8);
+  }
+
+  // House banner tint
+  const houseImg = unitImageCache['houseBanner'];
+  const houseColor = getHouseColor(u.HouseID);
+  if (houseImg?.complete) tintedDraw(houseImg, x, y, w, h, houseColor, 1);
+
+  // Main unit image (unique per unit, fallback if missing)
+  let img = unitImageCache[u.ImagePath];
+  if (!img) {
+    img = new Image();
+    img.src = u.ImagePath || '/images/units/army.png';
+    unitImageCache[u.ImagePath] = img;
+    img.onload = scheduleRenderScene;
+  }
+  if (img.complete) {
+    ctx.drawImage(img, x, y, w, h);
+  }
+
+  // Unit name (above icon)
+  if (u.UnitName) {
+    ctx.save();
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'black';
+    ctx.strokeText(u.UnitName, mapX, y - 2);
+    ctx.fillStyle = 'white';
+    ctx.fillText(u.UnitName, mapX, y - 2);
+    ctx.restore();
+  }
+}
+
+function drawAllHoldings() {
+  if (!Array.isArray(store.holdings)) return;
+  store.holdings.forEach(h => {
+    const [cx, cy] = hexToPixel(h.col, h.row);
+    drawHoldingSprite(h, cx, cy);
+  });
+}
+
+function drawHoldingSprite(h, mapX, mapY) {
+  const factor = Math.sqrt(store.camera.scale || 1);
+  const w = BASE_HOLDING_SIZE * factor;
+  const hSize = BASE_HOLDING_SIZE * factor;
+  const x = mapX - w / 2;
+  const y = mapY + HEX_HEIGHT / 2 - hSize;
+
+  // Holding image (with tint)
+  let img = holdingImageCache[h.ImagePath];
+  if (!img) {
+    img = new Image();
+    img.src = h.ImagePath || '/images/holdings/castle.png';
+    holdingImageCache[h.ImagePath] = img;
+    img.onload = scheduleRenderScene;
+  }
+  if (img.complete) {
+    tintedDraw(img, x, y, w, hSize, getHouseColor(h.HouseID), 1);
+  }
+
+  // Holding name
+  if (h.HoldingName) {
+    ctx.save();
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'black';
+    ctx.strokeText(h.HoldingName, mapX, y - 2);
+    ctx.fillStyle = 'white';
+    ctx.fillText(h.HoldingName, mapX, y - 2);
+    ctx.restore();
+  }
+}
+
 /**
- * Utility: tinted drawing using an offscreen canvas.
+ * Draw tinted (colorized) image, with result cached for performance.
  */
 function tintedDraw(img, x, y, w, h, color, tintAlpha = 0.8) {
+  if (!img.complete || img.naturalWidth === 0) return;
   const cacheKey = `${img.src}-${color}-${tintAlpha}`;
   let tintedCanvas = tintedCache[cacheKey];
 
@@ -190,185 +317,16 @@ function tintedDraw(img, x, y, w, h, color, tintAlpha = 0.8) {
     tintedCanvas.width = img.naturalWidth;
     tintedCanvas.height = img.naturalHeight;
     const offCtx = tintedCanvas.getContext('2d');
-    offCtx.imageSmoothingEnabled = true;
-    
-    // Draw original image.
     offCtx.drawImage(img, 0, 0);
-    
-    // Multiply tint.
     offCtx.globalCompositeOperation = 'multiply';
     offCtx.fillStyle = color;
     offCtx.globalAlpha = tintAlpha;
     offCtx.fillRect(0, 0, img.naturalWidth, img.naturalHeight);
-    
-    // Restore original details.
     offCtx.globalCompositeOperation = 'destination-atop';
     offCtx.globalAlpha = 1;
     offCtx.drawImage(img, 0, 0);
-    
     tintedCache[cacheKey] = tintedCanvas;
   }
-  
-  ctx.save();
+
   ctx.drawImage(tintedCanvas, 0, 0, img.naturalWidth, img.naturalHeight, x, y, w, h);
-  ctx.restore();
-}
-
-/**
- * Convert a hex color and alpha value to an rgba string.
- */
-function hexToRgba(hex, alpha) {
-  if (!hex || !hex.startsWith('#') || hex.length < 7) {
-    return `rgba(255,255,255,${alpha})`;
-  }
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-/** =======================
- *   UNITS
- ======================= */
-function drawAllUnits() {
-  if (!store.units) return;
-  store.units.forEach(u => {
-    const [cx, cy] = hexToPixel(u.col, u.row);
-    drawUnitSprite(u, cx, cy);
-  });
-}
-
-function drawUnitSprite(u, mapX, mapY) {
-  const iconFactor = Math.sqrt(store.camera.scale);
-  const drawW = BASE_UNIT_SIZE * iconFactor;
-  const drawH = BASE_UNIT_SIZE * iconFactor;
-  const drawX = mapX - drawW / 2;
-  const drawY = mapY + (HEX_HEIGHT / 2) - drawH;
-
-  // 1. Base Image (untinted)
-  if (baseImage && baseImage.complete && baseImage.naturalWidth > 0) {
-    ctx.drawImage(baseImage, drawX, drawY, drawW, drawH);
-  }
-
-  // 2. Region Banner (tinted with region color)
-  let regionBannerImg = unitImageCache['regionBanner'];
-  if (!regionBannerImg) {
-    regionBannerImg = new Image();
-    regionBannerImg.src = '/images/units/regionBanner.png';
-    unitImageCache['regionBanner'] = regionBannerImg;
-    regionBannerImg.onload = scheduleRenderScene;
-    regionBannerImg.onerror = () => console.error('Failed to load region banner image');
-  }
-  let regionColor = '#ffffff';
-  if (u.RegionID && store.regions) {
-    const reg = store.regions.find(r => r.RegionID === u.RegionID);
-    if (reg && reg.regionColor) {
-      regionColor = reg.regionColor;
-    }
-  }
-  if (regionBannerImg.complete && regionBannerImg.naturalWidth > 0) {
-    tintedDraw(regionBannerImg, drawX, drawY, drawW, drawH, regionColor, 0.8);
-  }
-
-  // 3. House Banner (tinted with house color)
-  let houseBannerImg = unitImageCache['houseBanner'];
-  if (!houseBannerImg) {
-    houseBannerImg = new Image();
-    houseBannerImg.src = '/images/units/houseBanner.png';
-    unitImageCache['houseBanner'] = houseBannerImg;
-    houseBannerImg.onload = scheduleRenderScene;
-    houseBannerImg.onerror = () => console.error('Failed to load house banner image');
-  }
-  const houseColor = getHouseColor(u.HouseID);
-  if (houseBannerImg.complete && houseBannerImg.naturalWidth > 0) {
-    tintedDraw(houseBannerImg, drawX, drawY, drawW, drawH, houseColor, 1);
-  }
-
-  // 4. Unit Icon (untinted)
-  let img = unitImageCache[u.ImagePath];
-  if (!img) {
-    img = new Image();
-    img.src = u.ImagePath || '/images/units/army.png';
-    unitImageCache[u.ImagePath] = img;
-    img.onload = scheduleRenderScene;
-    img.onerror = () => console.error('Failed to load unit image:', img.src);
-  }
-  if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-  }
-
-  // 5. Label.
-  if (u.UnitName) {
-    ctx.save();
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    const labelX = mapX;
-    const labelY = drawY - 2;
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'black';
-    ctx.strokeText(u.UnitName, labelX, labelY);
-    ctx.fillStyle = 'white';
-    ctx.fillText(u.UnitName, labelX, labelY);
-    ctx.restore();
-  }
-}
-
-/** =======================
- *   HOLDINGS
- ======================= */
-function drawAllHoldings() {
-  if (!store.holdings) return;
-  store.holdings.forEach(h => {
-    const [cx, cy] = hexToPixel(h.col, h.row);
-    drawHoldingSprite(h, cx, cy);
-  });
-}
-
-function drawHoldingSprite(h, mapX, mapY) {
-  const iconFactor = Math.sqrt(store.camera.scale);
-  const drawW = BASE_HOLDING_SIZE * iconFactor;
-  const drawH = BASE_HOLDING_SIZE * iconFactor;
-  const drawX = mapX - drawW / 2;
-  const drawY = mapY + (HEX_HEIGHT / 2) - drawH;
-
-  const houseColor = getHouseColor(h.HouseID);
-  let img = holdingImageCache[h.ImagePath];
-  if (!img) {
-    img = new Image();
-    img.src = h.ImagePath || '/images/holdings/castle.png';
-    holdingImageCache[h.ImagePath] = img;
-    img.onload = scheduleRenderScene;
-    img.onerror = () => console.error('Failed to load holding image:', img.src);
-  }
-  if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
-    tintedDraw(img, drawX, drawY, drawW, drawH, houseColor, 1);
-  }
-
-  // Holding label.
-  if (h.HoldingName) {
-    ctx.save();
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    const labelX = mapX;
-    const labelY = drawY - 2;
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'black';
-    ctx.strokeText(h.HoldingName, labelX, labelY);
-    ctx.fillStyle = 'white';
-    ctx.fillText(h.HoldingName, labelX, labelY);
-    ctx.restore();
-  }
-}
-
-/**
- * Utility: get the house color for a HouseID.
- */
-function getHouseColor(houseID) {
-  if (!houseID) {
-    return '#ffffff';
-  }
-  const h = store.houses.find(x => x.HouseID === houseID);
-  return h ? h.HouseColor : '#ffffff';
 }
